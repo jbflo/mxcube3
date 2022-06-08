@@ -31,7 +31,7 @@ export default class SampleControls extends React.Component {
   }
 
   setZoom(option) {
-    const newZoom = this.props.attributes.zoom.commands[option.target.value];
+    const newZoom = this.props.hardwareObjects.zoom.commands[option.target.value];
     this.props.sendSetAttribute('zoom', newZoom);
   }
 
@@ -90,8 +90,8 @@ export default class SampleControls extends React.Component {
   }
 
   toggleLight(name) {
-    const lighstate = this.props.attributes[`${name}_switch`].value;
-    const newState = this.props.attributes[`${name}_switch`].commands.find(
+    const lighstate = this.props.hardwareObjects[`${name}_switch`].value;
+    const newState = this.props.hardwareObjects[`${name}_switch`].commands.find(
       (state) => state !== lighstate
     );
     this.props.sendSetAttribute(`${name}_switch`, newState);
@@ -150,13 +150,13 @@ export default class SampleControls extends React.Component {
   }
 
   render() {
-    const { attributes } = this.props;
+    const { hardwareObjects } = this.props;
 
     const foucs_motor_uiprop = find(
       this.props.uiproperties.components, { role: 'focus' }
     );
 
-    const focus_motor = this.props.attributes[foucs_motor_uiprop.attribute];
+    const focus_motor = this.props.hardwareObjects[foucs_motor_uiprop.attribute];
 
     return (
       <div style={{ display: 'flex', position: 'absolute', width: '100%' }}>
@@ -236,25 +236,25 @@ export default class SampleControls extends React.Component {
               placement="bottom"
               overlay={(
                 <span className="slider-overlay">
-                  {attributes.zoom.limits[0]}
+                  {hardwareObjects.zoom.limits[0]}
                   <input
                     style={{ top: '20px' }}
                     className="bar"
                     type="range"
                     id="zoom-control"
-                    min={attributes.zoom.limits[0]}
-                    max={attributes.zoom.limits[1]}
+                    min={hardwareObjects.zoom.limits[0]}
+                    max={hardwareObjects.zoom.limits[1]}
                     step="1"
-                    value={attributes.zoom.commands.indexOf(attributes.zoom.value)}
-                    disabled={attributes.zoom.state !== MOTOR_STATE.READY}
+                    value={hardwareObjects.zoom.commands.indexOf(hardwareObjects.zoom.value)}
+                    disabled={hardwareObjects.zoom.state !== MOTOR_STATE.READY}
                     onMouseUp={this.setZoom}
                     onChange={(e) => {
-                      this.props.setBeamlineAttribute('zoom', attributes.zoom.commands[e.target.value])
+                      this.props.setBeamlineAttribute('zoom', hardwareObjects.zoom.commands[e.target.value])
                     }}
                     list="volsettings"
                     name="zoomSlider"
                   />
-                  {attributes.zoom.limits[1]}
+                  {hardwareObjects.zoom.limits[1]}
                 </span>
           )}
             >
@@ -269,10 +269,10 @@ export default class SampleControls extends React.Component {
                 <datalist id="volsettings">
                   {[
                     ...new Array(
-                      attributes.zoom.limits[1] - attributes.zoom.limits[0]
+                      hardwareObjects.zoom.limits[1] - hardwareObjects.zoom.limits[0]
                     ).keys(),
                   ].map((i) => (
-                    <option key={`z-${attributes.zoom.limits[0] + i}`}>{attributes.zoom.limits[0] + i}</option>
+                    <option>{hardwareObjects.zoom.limits[0] + i}</option>
                   ))}
                 </datalist>
                 <span className="sample-control-label">Zoom</span>
@@ -287,8 +287,8 @@ export default class SampleControls extends React.Component {
                 className="fas fa-lightbulb sample-control"
                 onClick={this.toggleBackLight}
                 active={
-                  attributes.backlight_switch.value ===
-                  attributes.backlight_switch.commands[0]
+                  hardwareObjects.backlight_switch.value ===
+                  hardwareObjects.backlight_switch.commands[0]
                 }
               />
               <OverlayTrigger
@@ -302,10 +302,10 @@ export default class SampleControls extends React.Component {
                       className="bar"
                       type="range"
                       step="0.1"
-                      min={attributes.backlight.limits[0]}
-                      max={attributes.backlight.limits[1]}
-                      value={attributes.backlight.value}
-                      disabled={attributes.backlight.state !== MOTOR_STATE.READY}
+                      min={hardwareObjects.backlight.limits[0]}
+                      max={hardwareObjects.backlight.limits[1]}
+                      value={hardwareObjects.backlight.value}
+                      disabled={hardwareObjects.backlight.state !== MOTOR_STATE.READY}
                       onMouseUp={e => this.props.sendSetAttribute('backlight', e.target.value)}
                       onChange={e => this.props.setBeamlineAttribute('backlight', e.target.value)}
                       name="backlightSlider"
@@ -329,7 +329,7 @@ export default class SampleControls extends React.Component {
                 className="fas fa-lightbulb sample-control"
                 onClick={this.toggleFrontLight}
                 active={
-                  attributes.frontlight_switch.value === attributes.backlight_switch.commands[0]
+                  hardwareObjects.frontlight_switch.value === hardwareObjects.backlight_switch.commands[0]
                 }
               />
               <OverlayTrigger
@@ -342,10 +342,10 @@ export default class SampleControls extends React.Component {
                       className="bar"
                       type="range"
                       step="0.1"
-                      min={attributes.frontlight.limits[0]}
-                      max={attributes.frontlight.limits[1]}
-                      value={attributes.frontlight.value}
-                      disabled={attributes.frontlight.state !== MOTOR_STATE.READY}
+                      min={hardwareObjects.frontlight.limits[0]}
+                      max={hardwareObjects.frontlight.limits[1]}
+                      value={hardwareObjects.frontlight.value}
+                      disabled={hardwareObjects.frontlight.state !== MOTOR_STATE.READY}
                       onMouseUp={e => this.props.sendSetAttribute('frontlight', e.target.value)}
                       onChange={e => this.props.setBeamlineAttribute('frontlight', e.target.value)}
                       name="frontLightSlider"

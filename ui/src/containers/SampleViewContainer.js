@@ -96,7 +96,7 @@ class SampleViewContainer extends Component {
                 save={this.props.sendSetAttribute}
                 saveStep={setStepSize}
                 uiproperties={uiproperties.sample_view}
-                attributes={this.props.attributes}
+                hardwareObjects={this.props.hardwareObjects}
                 motorsDisabled={this.props.motorInputDisable
                                   || this.props.queueState === QUEUE_RUNNING}
                 steps={motorSteps}
@@ -126,7 +126,7 @@ class SampleViewContainer extends Component {
                 sampleActions={this.props.sampleViewActions}
                 {...this.props.sampleViewState}
                 uiproperties={uiproperties.sample_view}
-                attributes={this.props.attributes}
+                hardwareObjects={this.props.hardwareObjects}
                 steps={motorSteps}
                 imageRatio={imageRatio * sourceScale}
                 contextMenuVisible={this.props.contextMenu.show}
@@ -166,7 +166,7 @@ function mapStateToProps(state) {
     sampleViewState: state.sampleview,
     contextMenu: state.contextMenu,
     motorInputDisable: state.beamline.motorInputDisable,
-    attributes: state.beamline.attributes,
+    hardwareObjects: state.beamline.hardwareObjects,
     availableMethods: state.beamline.availableMethods,
     defaultParameters: state.taskForm.defaultParameters,
     shapes: state.shapes.shapes,

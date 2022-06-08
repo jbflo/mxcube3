@@ -585,11 +585,11 @@ export default class SampleImage extends React.Component {
   wheel(e) {
     e.preventDefault();
     e.stopPropagation();
-    const { sampleActions, motorSteps, attributes } = this.props;
+    const { sampleActions, motorSteps, hardwareObjects } = this.props;
     const { sendMotorPosition, sendZoomPos } = sampleActions;
     const keyPressed = this._keyPressed;
 
-    const { phi, focus, zoom } = attributes;
+    const { phi, focus, zoom } = hardwareObjects;
 
     if (keyPressed === 'r' && phi.state === MOTOR_STATE.READY) {
       // then we rotate phi axis by the step size defined in its box
