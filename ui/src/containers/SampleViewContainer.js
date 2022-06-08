@@ -120,6 +120,7 @@ class SampleViewContainer extends Component {
                 savedPointId={this.props.sampleViewState.savedPointId}
                 groupFolder={this.props.groupFolder}
                 clickCentring={this.props.sampleViewState.clickCentring}
+                taskForm={this.props.taskForm}
               />
               <SampleImage
                 generalActions={this.props.generalActions}
@@ -176,6 +177,7 @@ function mapStateToProps(state) {
     proposal: state.login.selectedProposal,
     remoteAccess: state.remoteAccess,
     uiproperties: state.uiproperties,
+    taskForm: state.taskForm
   };
 }
 

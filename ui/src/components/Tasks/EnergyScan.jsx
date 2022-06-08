@@ -150,13 +150,16 @@ EnergyScan = connect(state => {
     position = `[${vals}]`;
   }
 
+  const { type } = state.taskForm.taskData;
+  const limits = state.taskForm.defaultParameters[type.toLowerCase()].limits;
+
   return {
     path: `${state.login.rootPath}/${subdir}`,
     filename: state.taskForm.taskData.parameters.fileName,
     edge,
     element,
     wfname: state.taskForm.taskData.parameters.wfname,
-    acqParametersLimits: state.taskForm.acqParametersLimits,
+    acqParametersLimits: limits,
     suffix: fileSuffix,
     initialValues: {
       ...state.taskForm.taskData.parameters,
