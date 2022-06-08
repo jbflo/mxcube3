@@ -4,8 +4,14 @@ import os
 import traceback
 
 from gevent import monkey
-monkey.patch_all(thread=False)
+
+# NB HardwareRepository must be imported *before* the gevent monkeypatching
+# in order to set the unpatched version of socket for use elseqhere
+# See HardwareRepository.original_socket
 from mxcubecore import HardwareRepository as HWR
+
+monkey.patch_all(thread=False)
+
 
 from optparse import OptionParser
 
@@ -44,17 +50,24 @@ def parse_args():
         default=f"{os.getcwd()}ui/build",
     )
 
-
     opt_parser.add_option(
         "-l",
         "--log-file",
         dest="log_file",
-        help="Hardware Repository log file name",
+        help="Log file name",
         default="",
     )
 
     opt_parser.add_option(
-        "-v",
+        "-L",
+        "--log-level",
+        dest="log_level",
+        help="Log level for thirdparty libraries, mxcube-server log level is always DEBUG ",
+        default="",
+    )
+
+    opt_parser.add_option(
+        "-d",
         "--video-device",
         dest="video_device",
         help="Video device, defaults to: No device",
@@ -98,15 +111,15 @@ def main():
 
         cfg = Config(config_path)
 
-        server.init(cmdline_options, cfg, mxcube)
-        mxcube.init(
-            server,
-            cmdline_options.allow_remote,
-            cmdline_options.ra_timeout,
-            cmdline_options.video_device,
-            cmdline_options.log_file,
-            cfg,
-        )
+    mxcube.init(
+        server,
+        cmdline_options.allow_remote,
+        cmdline_options.ra_timeout,
+        cmdline_options.video_device,
+        cmdline_options.log_file,
+        cmdline_options.log_level,
+        cfg,
+    )
 
         server.register_routes(mxcube)
     except:
