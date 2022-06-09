@@ -103,6 +103,7 @@ default_acquisition_parameters:
         osc_range: 1
         overlap: -89
         num_images: 4
+        shutterless: false
 
     mesh:
         # Defaults for 'advanced' acquisition. Missing values are taken from default
