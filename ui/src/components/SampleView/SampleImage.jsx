@@ -788,9 +788,9 @@ export default class SampleImage extends React.Component {
       />
     );
 
-    if (format === 'MPEG1') {
-      result = <canvas id="sample-img" className="img" />;
-    }
+    // if (format === 'MPEG1') {
+    //  result = <canvas id="sample-img" className="img" />;
+    // }
 
     return result;
   }
@@ -800,27 +800,29 @@ export default class SampleImage extends React.Component {
       const canvas = document.querySelector('#sample-img');
        
       let source = !process.env.VIDEO_STREAM_URL
-        ? `ws://${document.location.hostname}:4042/`
+        ? `http://${document.location.hostname}:4042/`
         : process.env.VIDEO_STREAM_URL;
       const streamOnLocalHost = process.env.VIDEO_STREAM_ON_LOCAL_HOST;
       /* eslint-enable no-undef */
 
       // Use local video stream if there is one
       if (document.location.hostname === 'localhost' && streamOnLocalHost) {
-        source = `ws://${document.location.hostname}:4042/`;
+        source = `http://${document.location.hostname}:4042/`;
       }
 
       source += this.props.videoHash;
 
-      if (this.props.videoFormat === 'MPEG1' && canvas) {
-        this.player = new jsmpeg.JSMpeg.Player(source, {
-          canvas,
-          decodeFirstFrame: false,
-          preserveDrawingBuffer: true,
-          protocols: [],
-        });
-        this.player.play();
-      }
+      // if (this.props.videoFormat === 'MPEG1' && canvas) {
+      //  this.player = new jsmpeg.JSMpeg.Player(source, {
+      //    canvas,
+      //    decodeFirstFrame: false,
+      //    preserveDrawingBuffer: true,
+      //    protocols: [],
+      //  });
+      //  this.player.play();
+      // }
+
+      canvas.src = source;
     }
   }
 
