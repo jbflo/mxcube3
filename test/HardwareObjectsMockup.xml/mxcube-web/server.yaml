@@ -11,6 +11,11 @@ server:
 
 mxcube:
   VIDEO_FORMAT: MJPEG
+  # INTERNAL or EXTERNAL
+  # INTERNAL: mxcube server generates MJPEG stream,
+  # EXTERNAL: a streaming process (started via TangoLimaMpegVideo hardware object)
+  # manages streaming. Handles both MPEG and MJPEG
+  VIDEO_STREAMER: EXTERNAL
   # Mode, SSX, OSC
   mode: SSX
 
