@@ -1,10 +1,10 @@
 import React from 'react';
-import { Menu, Item, Separator, Submenu, MenuProvider, contextMenu } from 'react-contexify';
+import { Menu, Item, Separator, contextMenu } from 'react-contexify';
 import 'fabric';
 import './ssxchipcontrol.css';
 import "react-contexify/dist/ReactContexify.css";
 
-const fabric = window.fabric;
+const { fabric } = window;
 
 function _GridData(fabricObject) {
   return {
@@ -28,7 +28,7 @@ function _GridData(fabricObject) {
   };
 }
 
-const ChipContextMenu = (props) => {
+function ChipContextMenu(props) {
   return (
     <Menu  id="chip-context-menu">
       <li role="heading" aria-level="2" className="dropdown-header">
@@ -79,7 +79,7 @@ export default class SSXChip extends React.Component {
       this.freeFormCanvas.renderAll();
     }
 
-    return false
+    return false;
   }
 
   showContextMenu(event, selection) {
@@ -91,7 +91,7 @@ export default class SSXChip extends React.Component {
         y: event.e.offsetY + 55,
       },
       props: {
-        selection: selection
+        selection
       },
     });
   }
@@ -330,12 +330,9 @@ export default class SSXChip extends React.Component {
       }
     });
 
-    this.fc.on('mouse:dblclick', (event) => {
-      const object = canvas.findTarget(event.e);
-      console.log(object.type);
-      console.log("move to:" + object.objectIndex);
-      console.log("double click")
-    });
+//    this.fc.on('mouse:dblclick', (event) => {
+//      const object = canvas.findTarget(event.e);
+//    });
 
     this.fc.add(...this.renderChip(
       canvasWidth,
@@ -367,7 +364,7 @@ export default class SSXChip extends React.Component {
     this.freeFormCanvas.on('mouse:down', (event) => {
       const pointer = this.freeFormCanvas.getPointer(event.e);
 
-      if (!event.e.altKey) return;
+      if (!event.e.altKey) { return };
       this.freeFormCanvas.discardActiveObject();
 
       this.isDown = true;
