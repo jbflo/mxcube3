@@ -16,8 +16,8 @@ mxcube:
   # EXTERNAL: a streaming process (started via TangoLimaMpegVideo hardware object)
   # manages streaming. Handles both MPEG and MJPEG
   VIDEO_STREAMER: EXTERNAL
-  # Mode, SSX, OSC
-  mode: SSX
+  # Mode, SSX-CHIP, SSX-INJECTOR, OSC
+  mode: SSX-CHIP
 
   usermanager:
     class: UserManager
