@@ -90,18 +90,21 @@ class SampleViewContainer extends Component {
               sm={1}
               style={{ paddingRight: '1px', paddingLeft: '0.7em' }}
             >
-              {apertureControl}
-              <SSXChipControl
-                showForm={this.props.showForm}
-                sampleID={sampleID}
-                sampleData={this.props.sampleList[sampleID]}
-                defaultParameters={this.props.defaultParameters}
-                groupFolder={this.props.groupFolder}
-                hardwareObjects={this.props.hardwareObjects}
-                sampleActions={this.props.sampleViewActions}
-                grids={grids}
-                selectedGrids={selectedGrids}
-              />
+             {apertureControl}
+             { this.props.mode === 'SSX-CHIP' ?
+               (<SSXChipControl
+                 showForm={this.props.showForm}
+                 sampleID={sampleID}
+                 sampleData={this.props.sampleList[sampleID]}
+                 defaultParameters={this.props.defaultParameters}
+                 groupFolder={this.props.groupFolder}
+                 hardwareObjects={this.props.hardwareObjects}
+                 sampleActions={this.props.sampleViewActions}
+                 grids={grids}
+                 selectedGrids={selectedGrids}
+                />
+               ) : null
+              }
               <MotorControl
                 save={this.props.sendSetAttribute}
                 saveStep={setStepSize}
@@ -187,7 +190,8 @@ function mapStateToProps(state) {
     proposal: state.login.selectedProposal,
     remoteAccess: state.remoteAccess,
     uiproperties: state.uiproperties,
-    taskForm: state.taskForm
+    taskForm: state.taskForm,
+    mode: state.general.mode
   };
 }
 
