@@ -408,9 +408,10 @@ export default class SampleImage extends React.Component {
 
       group.getObjects().forEach((obj) => {
         if (
-          !objectFound &&
-          obj.containsPoint(clickPoint, null, true) &&
-          obj.selectable
+           (!objectFound &&
+             obj.containsPoint(clickPoint, null, true) &&
+            obj.selectable) || 
+            obj.active
         ) {
           objectFound = true;
         }
