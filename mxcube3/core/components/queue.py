@@ -2417,7 +2417,7 @@ class Queue(ComponentBase):
         data_model = getattr(queue_entry, "DATA_MODEL", None)
         requires = getattr(queue_entry, "REQUIRES", None)
         display_name = getattr(queue_entry, "NAME", None)
-        # NB This logic should be moved so that the defualt paramters for
+        # NB This logic should be moved so that the defualt parameters for
         # a task can be retreived from one place.
         
         if task_name == "characterisation":
