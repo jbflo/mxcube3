@@ -12,7 +12,7 @@ module.exports = function(app) {
     '/socket.io/*',
     createProxyMiddleware({
       target: 'ws://localhost:8081',
-      changeOrigin: true,
+      // changeOrigin: true,
       ws: true
     })
   );

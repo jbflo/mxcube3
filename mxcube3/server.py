@@ -4,11 +4,12 @@ import signal
 import atexit
 import os
 import time
+from datetime import timedelta
 
 import gevent
 
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flask import Flask, request, session
+from flask import Flask, request
 from flask_socketio import SocketIO
 
 import flask_security
@@ -88,6 +89,7 @@ class Server:
             annotations=True,
         )
         Server.validate = Server.api.validate
+        Server.flask.permanent_session_lifetime = timedelta(minutes=1)
 
         # the following test prevents Flask from initializing twice
         # (because of the Reloader)
