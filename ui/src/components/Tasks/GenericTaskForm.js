@@ -35,6 +35,7 @@ class GenericTaskForm extends React.Component {
     this.addToQueue = this.addToQueue.bind(this);
     this.resetParameters = this.resetParameters.bind(this);
     this.defaultParameters = this.defaultParameters.bind(this);
+    this.jsformData = {};
   }
 
   submitAddToQueue() {
@@ -48,6 +49,7 @@ class GenericTaskForm extends React.Component {
   addToQueue(runNow, params) {
     const parameters = {
       ...params,
+      ...this.jsformData,
       label: params.name,
       shape: this.props.pointID,
       selection: this.props.taskData.parameters.selection
@@ -212,9 +214,9 @@ class GenericTaskForm extends React.Component {
        }
      };
 
-     const schema = this.setConstraintsFromDefualts (
+    const schema = this.setConstraintsFromDefualts (
       this.props.schema.user_collection_parameters
-     )
+    )
 
     return (
       <DraggableModal show={this.props.show} onHide={this.props.hide}>
@@ -256,9 +258,11 @@ class GenericTaskForm extends React.Component {
               liveValidate
               schema={schema}
               uiSchema={uiSchema}
+              onChange={({formData})=>{
+                this.jsformData = formData;
+              }}
               ObjectFieldTemplate={columnsObjectFieldTemplate}
-              >
-            </JSForm>
+            />
           </div>
 
         </Modal.Body>

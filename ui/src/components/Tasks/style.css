@@ -37,3 +37,8 @@
     width: 7em;
     margin-right: 3em;
 }
+
+.json-schema-form-group-div .checkbox>label {
+    display: flex;
+    flex-direction: row-reverse;
+}
