@@ -29,6 +29,7 @@ class Server:
     api = None
     user_datastore = None
     db_session = None
+    flask_socketio = None
 
     @staticmethod
     def exception_handler(e):

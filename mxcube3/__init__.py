@@ -110,16 +110,16 @@ def main():
         )
 
         cfg = Config(config_path)
-
-    mxcube.init(
-        server,
-        cmdline_options.allow_remote,
-        cmdline_options.ra_timeout,
-        cmdline_options.video_device,
-        cmdline_options.log_file,
-        cmdline_options.log_level,
-        cfg,
-    )
+        server.init(cmdline_options, cfg, mxcube)
+        mxcube.init(
+            server,
+            cmdline_options.allow_remote,
+            cmdline_options.ra_timeout,
+            cmdline_options.video_device,
+            cmdline_options.log_file,
+            cmdline_options.log_level,
+            cfg,
+        )
 
         server.register_routes(mxcube)
     except:
