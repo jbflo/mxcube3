@@ -352,8 +352,11 @@ class Queue(ComponentBase):
         # Always add link to data, (no request made)
         limsres["limsTaskLink"] = self.app.lims.get_dc_link(lims_id)
 
+        dtype_label =  qme.EXPERIMENT_TYPE._fields[node.experiment_type]
+        dtype_label = "OSC" if dtype_label == "NATIVE" else dtype_label
+
         res = {
-            "label": "Data Collection",
+            "label": dtype_label + " (" + parameters["fileName"] + ")",
             "type": "DataCollection",
             "parameters": parameters,
             "sampleID": sample_node.loc_str,
