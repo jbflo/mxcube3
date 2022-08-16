@@ -307,7 +307,8 @@ export default class ContextMenu extends React.Component {
     }
 
     const type = modalName === "Generic" ? extraParams.type : modalName.toLowerCase()
-    const name = modalName === "Generic" ?  defaultParameters[type].name: modalName.toLowerCase()
+    const name = modalName === "Generic" ? defaultParameters[type].name: modalName.toLowerCase()
+    const params = (type in defaultParameters) ? defaultParameters[type].acq_parameters : {}
 
     this.props.showForm(
       modalName,
@@ -315,7 +316,7 @@ export default class ContextMenu extends React.Component {
       {
         parameters:
         {
-          ...defaultParameters[type].acq_parameters,
+          ...params,
           ...extraParams,
           prefix: sampleData.defaultPrefix,
           name: name,
