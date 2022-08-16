@@ -56,17 +56,20 @@ def init_route(app, server, url_prefix):
 
     @server.flask.before_request
     def before_request():
-        if not current_user.is_anonymous:
-            now = datetime.datetime.now()
-            last_active = current_user.disconnect_timestamp
-            current_user.disconnect_timestamp = now
-            app.usermanager.update_user(current_user)
+        pass
+        # if not current_user.is_anonymous:
+        #     now = datetime.datetime.now()
+        #     last_active = current_user.disconnect_timestamp
+        #     last_active = last_active if last_active else now
 
-            delta = now - last_active
-            if delta.seconds > 60:
-                print('Your session has expired after 1 minute(s), you have been logged out')
-                app.usermanager.signout()
+        #     current_user.disconnect_timestamp = now
+        #     app.usermanager.update_user(current_user)
 
-            print(current_user.disconnect_timestamp)
+        #     delta = now - last_active
+        #     if delta.seconds > 60:
+        #         print('Your session has expired after 1 minute(s), you have been logged out')
+        #         app.usermanager.signout()
+
+        #     print(current_user.disconnect_timestamp)
 
     return bp

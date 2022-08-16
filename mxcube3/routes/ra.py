@@ -212,7 +212,7 @@ def init_route(app, server, url_prefix):
     def disconnect():
         current_user.disconnect_timestamp = datetime.now()
         app.usermanager.update_user(current_user)
-        gevent.spawn(app.usermanager.handle_disconnect, current_user.username)
+        #gevent.spawn(app.usermanager.handle_disconnect, current_user.username)
 
 
     return bp
