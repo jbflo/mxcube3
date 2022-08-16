@@ -6,11 +6,18 @@ import './MXNavbar.css';
 
 
 class MXNavbar extends React.Component {
-
   constructor(props) {
     super(props);
     this.findProposal = this.findProposal.bind(this);
     this.signOut = this.signOut.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener('beforeunload', this.signOut);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('beforeunload', this.signOut);
   }
 
   findProposal(prop) {
