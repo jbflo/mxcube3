@@ -111,13 +111,11 @@ class MXCUBECore:
 
     @staticmethod
     def _get_adapter_id(ho):
-        try:
-            if ho.username != None:
-                _id = ho.username
-            else:
-                _id = ho.name()[1:]
-        except:
-            _id = ho.name()[1:]
+        _id = ho.global_role
+
+        if _id == None:
+            import pdb
+            pdb.set_trace()
 
         return _id.replace(" ", "_").lower()
 
@@ -180,7 +178,7 @@ class MXCUBECore:
 
         print(
             make_table(
-                ["Name", "Adapter", "HO filename"],
+                ["Name (global_role)", "Adapter", "HO filename"],
                 [
                     [item["id"], item["adapter_cls"], item["ho"]]
                     for item in MXCUBECore.adapter_dict.values()
