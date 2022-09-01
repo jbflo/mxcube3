@@ -27,16 +27,22 @@ sys.path.append("./")
 
 from mxcubecore import HardwareRepository
 from mxcube3 import main
+from flask_login import current_user
 
 _SIO_TEST_CLIENT = None
 
 
 @pytest.fixture
 def client():
+    try:
+        os.remove("/tmp/mxcube-test-user.db")
+    except FileNotFoundError:
+        pass
+
     global _SIO_TEST_CLIENT
 
     HardwareRepository.uninit_hardware_repository()
-    server, _ = main()
+    server = main(test=True)
     server.flask.config["TESTING"] = True
 
     client = server.flask.test_client()
@@ -83,6 +89,12 @@ def client():
     yield client
 
     client.get("/mxcube/api/v0.1/login/signout/")
+
+    try:
+        os.remove("/tmp/mxcube-test-user.db")
+    except FileNotFoundError:
+        pass
+
 
 @pytest.fixture
 def add_sample(client):

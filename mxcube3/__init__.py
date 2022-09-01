@@ -95,8 +95,7 @@ def parse_args():
     return opt_parser.parse_args()
 
 
-def main():
-
+def main(test=False):
     try:
         cmdline_options, args = parse_args()
 
@@ -110,6 +109,10 @@ def main():
         )
 
         cfg = Config(config_path)
+
+        if test:
+            cfg.flask.USER_DB_PATH = "/tmp/mxcube-test-user.db"
+
         server.init(cmdline_options, cfg, mxcube)
         mxcube.init(
             server,
@@ -126,8 +129,10 @@ def main():
         traceback.print_exc()
         raise
 
-    server.run()
-
+    if not test:
+        server.run()
+    else:
+        return server
 
 if __name__ == "__main__":
     main()
