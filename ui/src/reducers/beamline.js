@@ -139,6 +139,7 @@ export const INITIAL_STATE = {
   plotsData: {},
   availableMethods: {},
   energyScanElements: [],
+  doseEstimate: {}
 };
 
 export default (state = INITIAL_STATE, action) => {
@@ -233,6 +234,7 @@ export default (state = INITIAL_STATE, action) => {
         beamlineActionsList: [...action.data.beamlineSetup.actionsList],
         availableMethods: action.data.beamlineSetup.availableMethods,
         energyScanElements: action.data.beamlineSetup.energyScanElements,
+        doseEstimate: action.data.beamlineSetup.doseEstimate,
       };
     case 'BL_MACH_INFO':
       return {

@@ -93,7 +93,12 @@ function ReduxInputField(prop) {
       <Form.Control
         disabled={prop.disabled}
         value={prop.input.value}
-        onChange={prop.input.onChange}
+        // onChange={prop.input.onChange}
+        name={prop.propName}
+        onChange={e => {
+          prop.input.onChange(e.target.value);
+          prop.customOnchange && prop.customOnchange(e, prop.propName, e.target.value)
+        }}
         {...prop}
         style={{ borderColor: validation(prop.meta.error, prop.meta.warning) }}
       />

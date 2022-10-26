@@ -217,6 +217,12 @@ class Beamline(ComponentBase):
             {"energyScanElements": ho.get_available_elements().get("elements", [])}
         )
 
+        # import pdb; pdb.set_trace()
+
+        data.update(
+            {"doseEstimate": ho.get_datacollection_values()}
+        )
+
         return data
 
     def beamline_get_actions(self):

@@ -18,6 +18,7 @@ import {
 } from './fields';
 
 import { SPACE_GROUPS } from '../../constants';
+import { TiHeadphones } from 'react-icons/ti';
 
 class DataCollection extends React.Component {
   constructor(props) {
@@ -31,6 +32,8 @@ class DataCollection extends React.Component {
     this.addToQueue = this.addToQueue.bind(this);
     this.resetParameters = this.resetParameters.bind(this);
     this.defaultParameters = this.defaultParameters.bind(this);
+
+    this.InputFieldChange = this.InputFieldChange.bind(this);
   }
 
   submitAddToQueue() {
@@ -39,6 +42,11 @@ class DataCollection extends React.Component {
 
   submitRunNow() {
     this.props.handleSubmit(this.addToQueue.bind(this, true))();
+  }
+
+  InputFieldChange(e, name, value) {
+    const pro = this.props;
+    debugger;
   }
 
   addToQueue(runNow, params) {
@@ -203,7 +211,7 @@ class DataCollection extends React.Component {
           <FieldsHeader title="Acquisition" />
           <Form>
             <FieldsRow>
-              <InputField propName="osc_range" type="number" label="Oscillation range" />
+              <InputField customOnchange={this.InputFieldChange} propName="osc_range" type="number" label="Oscillation range" />
               <InputField propName="first_image" type="number" label="First image" />
             </FieldsRow>
             <FieldsRow>
@@ -237,7 +245,8 @@ class DataCollection extends React.Component {
               )
               : null
             }
-            {/* <StaticField col1='3' col2='4' label="Dose Estimation " data='10.9898' /> */}
+            <StaticField col1='3' col2='4' label="Current Dose" data={this.props.beamline.doseEstimate.current_dose} />
+            <StaticField col1='3' col2='4' label="Dose Estimate" data={this.props.beamline.doseEstimate.dose_estimate} />
             <CollapsableRows>
               <FieldsRow>
                 <InputField propName="kappa" type="number" label="Kappa" />
