@@ -219,9 +219,9 @@ class Beamline(ComponentBase):
 
         # import pdb; pdb.set_trace()
 
-        data.update(
-            {"doseEstimate": ho.get_datacollection_values()}
-        )
+        # data.update(
+        #     {"doseEstimate": ho.get_datacollection_values()}
+        # )
 
         return data
 

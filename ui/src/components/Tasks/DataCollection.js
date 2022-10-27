@@ -33,7 +33,7 @@ class DataCollection extends React.Component {
     this.resetParameters = this.resetParameters.bind(this);
     this.defaultParameters = this.defaultParameters.bind(this);
 
-    this.InputFieldChange = this.InputFieldChange.bind(this);
+    this.inputFieldChange = this.inputFieldChange.bind(this);
   }
 
   submitAddToQueue() {
@@ -44,7 +44,7 @@ class DataCollection extends React.Component {
     this.props.handleSubmit(this.addToQueue.bind(this, true))();
   }
 
-  InputFieldChange(e, name, value) {
+  inputFieldChange(e, name, value) {
     const pro = this.props;
     debugger;
   }
@@ -211,7 +211,7 @@ class DataCollection extends React.Component {
           <FieldsHeader title="Acquisition" />
           <Form>
             <FieldsRow>
-              <InputField customOnchange={this.InputFieldChange} propName="osc_range" type="number" label="Oscillation range" />
+              <InputField customOnchange={this.inputFieldChange} propName="osc_range" type="number" label="Oscillation range" />
               <InputField propName="first_image" type="number" label="First image" />
             </FieldsRow>
             <FieldsRow>
@@ -245,8 +245,8 @@ class DataCollection extends React.Component {
               )
               : null
             }
-            <StaticField col1='3' col2='4' label="Current Dose" data={this.props.beamline.doseEstimate.current_dose} />
-            <StaticField col1='3' col2='4' label="Dose Estimate" data={this.props.beamline.doseEstimate.dose_estimate} />
+            <StaticField col1='3' col2='4' label="Current Dose" data={this.props.beamline.doseEstimate.current_flux_dose} />
+            <StaticField col1='3' col2='4' label="Dose Estimate" data={this.props.beamline.doseEstimate.flux_dose_estimate} />
             <CollapsableRows>
               <FieldsRow>
                 <InputField propName="kappa" type="number" label="Kappa" />

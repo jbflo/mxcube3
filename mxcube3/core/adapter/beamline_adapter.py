@@ -74,16 +74,21 @@ class _BeamlineAdapter:
 
     
     def get_datacollection_values(self):
-        current_dose = ''
-        dose_estimate = ''
+        """
+        Get the dose estimate for data collection.
+        Returns:
+            (dict): current dose. etc....
+        """
+        current_flux_dose = ''
+        flux_dose_estimate = ''
 
         # import pdb; pdb.set_trace()
 
         if hasattr(self._bl.flux, 'dose_rate'):
-            current_dose = self._bl.flux.dose_rate
-            dose_estimate = self._bl.flux.dose_estimate
+            current_flux_dose = self._bl.flux.get_current_flux_dose()
+            flux_dose_estimate = self._bl.flux.flux_dose_estimate
         
-        return { "current_dose": current_dose, "dose_estimate": dose_estimate }
+        return { "current_flux_dose": current_flux_dose, "flux_dose_estimate": flux_dose_estimate }
 
     def get_acquisition_limit_values(self):
         """
