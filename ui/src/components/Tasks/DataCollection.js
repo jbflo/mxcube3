@@ -245,8 +245,8 @@ class DataCollection extends React.Component {
               )
               : null
             }
-            <StaticField col1='3' col2='4' label="Current Dose" data={this.props.beamline.doseEstimate.current_flux_dose} />
-            <StaticField col1='3' col2='4' label="Dose Estimate" data={this.props.beamline.doseEstimate.flux_dose_estimate} />
+            <StaticField col1='3' col2='4' label="Current Dose" data={this.props.beamline.doseEstimate? this.props.beamline.doseEstimate.current_flux_dose : ''} />
+            <StaticField col1='3' col2='4' label="Dose Estimate" data={this.props.beamline.doseEstimate ? this.props.beamline.doseEstimate.flux_dose_estimate : ''} />
             <CollapsableRows>
               <FieldsRow>
                 <InputField propName="kappa" type="number" label="Kappa" />
