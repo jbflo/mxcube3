@@ -5,6 +5,7 @@ import redis
 import sys
 import traceback
 
+
 from gevent import monkey
 monkey.patch_all(thread=False)
 
@@ -68,7 +69,14 @@ def parse_args():
         "--enabled-loggers",
         dest="enabled_logger_list",
         help="Which loggers to use, default is to use all loggers ([exception_logger, hwr_logger, mx3_hwr_logger, user_logger, queue_logger])",
-        default=["exception_logger", "hwr_logger", "mx3_hwr_logger", "user_logger", "queue_logger"],
+        default=[
+            "exception_logger",
+            "hwr_logger",
+            "mx3_hwr_logger",
+            "user_logger",
+            "queue_logger",
+            "mx3_ui_logger",
+        ],
     )
 
     opt_parser.add_argument(
@@ -138,7 +146,7 @@ def main(test=False):
         raise
 
     if not test:
-        server.run()
+        server.run(cfg)
     else:
         return server
 

@@ -8,6 +8,7 @@ import logging
 import traceback
 import atexit
 import json
+import time
 
 from pathlib import Path
 from urllib.parse import urlparse
@@ -183,6 +184,7 @@ class MXCUBECore:
 
 
 class MXCUBEApplication:
+    t0 = time.time()
     # Below variables used for internal application state
 
     # SampleID and sample data of currently mounted sample, to handle samples
@@ -296,6 +298,8 @@ class MXCUBEApplication:
         MXCUBEApplication.init_state_storage()
 
         # MXCUBEApplication.load_settings()
+        msg = "MXCuBE 3 initialized, it took %.1f seconds" % (time.time() - MXCUBEApplication.t0)
+        logging.getLogger("MX3.HWR").info(msg)
 
     @staticmethod
     def init_sample_video(_format, port):
@@ -350,18 +354,33 @@ class MXCUBEApplication:
         log_formatter = ColorFormatter(fmt)
 
         if log_file:
+            os.chmod(log_file, 0o666)
+            Path(log_file).touch()
+
             log_file_handler = TimedRotatingFileHandler(
                 log_file, when="midnight", backupCount=7
             )
-            os.chmod(log_file, 0o666)
             log_file_handler.setFormatter(log_formatter)
 
-        if log_level:
-            root_logger = logging.getLogger()
-            root_logger.setLevel(getattr(logging, log_level.upper(), "INFO"))
+            uilog_file = f"{log_file[:-4]}_ui.log"
+            os.chmod(uilog_file, 0o666)
+            Path(uilog_file).touch()
+
+            uilog_file_handler = TimedRotatingFileHandler(
+                uilog_file, when="midnight", backupCount=7
+            )
+            uilog_file_handler.setFormatter(log_formatter)
+
+        if not log_level:
+            log_level = "INFO"
+        else:
+            log_level = log_level.upper()
+
+        root_logger = logging.getLogger()
+        root_logger.setLevel(log_level)
 
         custom_log_handler = MX3LoggingHandler(MXCUBEApplication.server)
-        custom_log_handler.setLevel(logging.DEBUG)
+        custom_log_handler.setLevel(log_level)
         custom_log_handler.setFormatter(log_formatter)
 
         _loggers = {
@@ -370,6 +389,7 @@ class MXCUBEApplication:
             "mx3_hwr_logger": logging.getLogger("MX3.HWR"),
             "user_logger": logging.getLogger("user_level_log"),
             "queue_logger": logging.getLogger("queue_exec"),
+            "mx3_ui_logger": logging.getLogger("MX3.UI"),
         }
 
         stdout_log_handler = StreamHandler(sys.stdout)
@@ -379,8 +399,11 @@ class MXCUBEApplication:
             if logger_name in enabled_logger_list:
                 logger.addHandler(custom_log_handler)
                 logger.addHandler(stdout_log_handler)
+                logger.setLevel(log_level)
 
-                if log_file:
+                if log_file and "mx3_ui" in logger_name:
+                    logger.addHandler(uilog_file_handler)
+                elif log_file:
                     logger.addHandler(log_file_handler)
 
                 logger.propagate = False
@@ -412,7 +435,7 @@ class MXCUBEApplication:
                     msg = f"{component_data.attribute} not accessible via Beamline object. "
                     msg += f"Verify that beamline.{component_data.attribute} is valid and/or "
                     msg += f"{component_data.attribute} accessible via get_role "
-                    msg += "check ui.yaml configuration file. " 
+                    msg += "check ui.yaml configuration file. "
                     msg += "(attribute will NOT be avilable in UI)"
                     logging.getLogger("HWR").warning(msg)
                     adapter_cls_name = ""

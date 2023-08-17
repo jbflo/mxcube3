@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect, useSelector } from 'react-redux';
-import { BrowserRouter as Router, Routes, Route, useLocation, Outlet, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  Outlet,
+  Navigate,
+} from 'react-router-dom';
 import { serverIO } from '../serverIO';
-import { store, statePersistor } from '../store';
+import { store } from '../store';
 import { getLoginInfo, startSession } from '../actions/login';
 import LoginContainer from '../containers/LoginContainer';
 import SampleViewContainer from '../containers/SampleViewContainer';
@@ -14,55 +21,60 @@ import HelpContainer from '../containers/HelpContainer';
 import Main from './Main';
 import LoadingScreen from '../components/LoadingScreen/LoadingScreen';
 
-function requireAuth() {
-  store.dispatch(getLoginInfo()).then(() => {
-    const {login} = store.getState();
+async function requireAuth() {
+  await store.dispatch(getLoginInfo());
+  const { login } = store.getState();
 
-    if (login.loggedIn) {
-      store.dispatch(startSession(login.user.inControl));
-    }
+  if (login.loggedIn) {
+    await store.dispatch(startSession(login.user.inControl));
+  }
 
-    if (login.loggedIn && !serverIO.initialized) {
-      serverIO.listen(store);
-      serverIO.connectStateSocket(statePersistor);
-    }
-  });
+  if (login.loggedIn && !serverIO.initialized) {
+    serverIO.listen(store);
+  }
 }
 
 function PrivateOutlet() {
   const loggedIn = useSelector((state) => state.login.loggedIn);
   const location = useLocation();
   requireAuth();
-  return loggedIn ? <Outlet /> : <Navigate to="/login" state={{ from: location }} replace />;
+  return loggedIn ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/login" state={{ from: location }} replace />
+  );
 }
 
-class App extends React.Component {
-  render() {
+function App(props) {
+  const { loggedIn } = props;
+
+  useEffect(() => {
     requireAuth();
+  }, []);
 
-    if (this.props.loggedIn === null) {
-      return (<LoadingScreen />);
-    }
-
-    return (
-      <Router>
-        <Routes>
-          <Route path="/login" element={<LoginContainer />} />
-          <Route path="/" element={<PrivateOutlet />}>
-            <Route path="" element={<Main />}>
-              <Route index element={<SampleViewContainer />} />
-              <Route path="samplegrid" element={<SampleListViewContainer />} />
-              <Route path="datacollection" element={<SampleViewContainer />} />
-              <Route path="equipment" element={<EquipmentContainer />} />
-              <Route path="logging" element={<LoggerContainer />} />
-              <Route path="remoteaccess" element={<RemoteAccessContainer />} />
-              <Route path="help" element={<HelpContainer />} />
-            </Route>
-          </Route>
-        </Routes>
-      </Router>
-    );
+  if (loggedIn === null) {
+    // Fetching login info
+    return <LoadingScreen />;
   }
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<LoginContainer />} />
+        <Route path="/" element={<PrivateOutlet />}>
+          <Route path="" element={<Main />}>
+            <Route index element={<SampleViewContainer />} />
+            <Route path="samplegrid" element={<SampleListViewContainer />} />
+            <Route path="datacollection" element={<SampleViewContainer />} />
+            <Route path="equipment" element={<EquipmentContainer />} />
+            <Route path="logging" element={<LoggerContainer />} />
+            <Route path="remoteaccess" element={<RemoteAccessContainer />} />
+            <Route path="help" element={<HelpContainer />} />
+          </Route>
+        </Route>
+      </Routes>
+    </Router>
+  );
 }
 
 function mapStateToProps(state) {

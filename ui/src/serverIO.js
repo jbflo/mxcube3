@@ -16,7 +16,7 @@ import {
   updateBeamlineHardwareObjectAction,
   updateBeamlineHardwareObjectValueAction,
   updateBeamlineHardwareObjectAttributeAction,
-  setMachInfo
+  setMachInfo,
 } from './actions/beamline';
 import {
   setActionState,
@@ -44,7 +44,7 @@ import { showGphlWorkflowParametersDialog } from './actions/gphl_workflow';
 
 import { incChatMessageCount, getRaState } from './actions/remoteAccess';
 
-import { doSignOut, getLoginInfo, refreshSession } from './actions/login';
+import { forcedSignout, getLoginInfo, refreshSession } from './actions/login';
 
 import {
   setSCState,
@@ -90,7 +90,7 @@ class ServerIO {
 
   connectStateSocket(statePersistor) {
     this.uiStateSocket = io.connect(
-      `//${document.domain}:${window.location.port}/ui_state`
+      `//${document.domain}:${window.location.port}/ui_state`,
     );
 
     this.uiStateSocket.on('state_update', (newState) => {
@@ -104,34 +104,58 @@ class ServerIO {
 
   disconnect() {
     this.connected = false;
-    this.hwrSocket.disconnect();
-    this.loggingSocket.disconnect();
-    clearInterval(this.refreshSession)
+    this.hwrSocket.close();
+    this.loggingSocket.close();
+    clearInterval(this.refreshSession);
+  }
+
+  connect() {
+    if (this.hwrSocket === null) {
+      this.hwrSocket = io.connect(
+        `//${document.domain}:${window.location.port}/hwr`,
+      );
+      this.hwrSocket.on('connect', function () {
+        console.log('hwrSocket connected!');
+      });
+      this.loggingSocket = io.connect(
+        `//${document.domain}:${window.location.port}/logging`,
+      );
+      this.hwrSocket.on('connect', function () {
+        console.log('loggingSocket connected!');
+      });
+    } else {
+      this.hwrSocket.connect();
+      this.loggingSocket.connect();
+    }
   }
 
   listen(store) {
     this.initialized = true;
     this.dispatch = store.dispatch;
 
-    setInterval(this.refreshSession, 50000)
+    setInterval(this.refreshSession, 50000);
 
-    this.hwrSocket = io.connect(
-      `//${document.domain}:${window.location.port}/hwr`
-    );
-    this.loggingSocket = io.connect(
-      `//${document.domain}:${window.location.port}/logging`
-    );
+    this.connect();
 
     this.loggingSocket.on('log_record', (record) => {
       this.dispatch(addUserMessage(record));
       this.dispatch(addLogRecord(record));
     });
 
+    this.loggingSocket.on('disconnect', (reason) => {
+      if (reason === 'io server disconnect') {
+        let socket = this.loggingSocket;
+        setTimeout(function () {
+          socket.connect();
+        }, 500);
+      }
+    });
+
     this.hwrSocket.on('ra_chat_message', (record) => {
       const { username } = store.getState().login.user;
       if (record.username !== username) {
         addResponseMessage(
-          `${record.date} **${record.nickname}:** \n\n ${record.message}`
+          `${record.date} **${record.nickname}:** \n\n ${record.message}`,
         );
         this.dispatch(incChatMessageCount());
       }
@@ -186,8 +210,8 @@ class ServerIO {
         updateTaskLimsData(
           record.sample,
           record.taskIndex,
-          record.limsResultData
-        )
+          record.limsResultData,
+        ),
       );
     });
 
@@ -217,8 +241,8 @@ class ServerIO {
             record.state,
             record.progress,
             record.limsResultData,
-            record.queueID
-          )
+            record.queueID,
+          ),
         );
       }
     });
@@ -255,8 +279,8 @@ class ServerIO {
               'Sample changer in operation',
               record.message,
               true,
-              () => this.dispatch(sendStopQueue())
-            )
+              () => this.dispatch(sendStopQueue()),
+            ),
           );
 
           break;
@@ -269,8 +293,8 @@ class ServerIO {
               `Loading sample ${record.location}`,
               record.message,
               true,
-              () => this.dispatch(sendStopQueue())
-            )
+              () => this.dispatch(sendStopQueue()),
+            ),
           );
 
           break;
@@ -283,8 +307,8 @@ class ServerIO {
               `Unloading sample ${record.location}`,
               record.message,
               true,
-              () => this.dispatch(sendStopQueue())
-            )
+              () => this.dispatch(sendStopQueue()),
+            ),
           );
 
           break;
@@ -292,8 +316,8 @@ class ServerIO {
         case 'loadReady': {
           this.dispatch(
             setLoading(false, 'SC Ready', record.message, true, () =>
-              this.dispatch(sendStopQueue())
-            )
+              this.dispatch(sendStopQueue()),
+            ),
           );
 
           break;
@@ -301,8 +325,8 @@ class ServerIO {
         case 'inSafeArea': {
           this.dispatch(
             setLoading(false, 'SC Safe', record.message, true, () =>
-              this.dispatch(sendStopQueue())
-            )
+              this.dispatch(sendStopQueue()),
+            ),
           );
 
           break;
@@ -323,7 +347,13 @@ class ServerIO {
       }
     });
 
-    this.hwrSocket.on('disconnect', () => {
+    this.hwrSocket.on('disconnect', (reason) => {
+      if (reason === 'io server disconnect') {
+        let socket = this.hwrSocket;
+        setTimeout(function () {
+          socket.connect();
+        }, 500);
+      }
       if (this.connected) {
         this.connected = false;
         setTimeout(() => {
@@ -366,26 +396,22 @@ class ServerIO {
 
     this.hwrSocket.on('observerLogout', (observer) => {
       addResponseMessage(
-        `**${observer.nickname}** (${observer.ip}) disconnected.`
+        `**${observer.nickname}** (${observer.ip}) disconnected.`,
       );
     });
 
     this.hwrSocket.on('observerLogin', (observer) => {
       if (observer.nickname && observer.ip) {
         addResponseMessage(
-          `**${observer.nickname}** (${observer.ip}) connected.`
+          `**${observer.nickname}** (${observer.ip}) connected.`,
         );
       } else {
         addResponseMessage(`${observer.nickname} connecting ...`);
       }
     });
 
-    this.hwrSocket.on('forceSignoutObservers', () => {
-      const state = store.getState();
-
-      if (!state.login.user.inControl) {
-        this.dispatch(doSignOut());
-      }
+    this.hwrSocket.on('forceSignout', () => {
+      this.dispatch(forcedSignout());
     });
 
     this.hwrSocket.on('workflowParametersDialog', (data) => {

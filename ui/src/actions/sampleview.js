@@ -418,13 +418,15 @@ export function sendDeleteShape(id) {
 export function unselectShapes(shapes) {
   return function (dispatch) {
     const _shapes = [];
-    const keys = Object.keys(shapes.shapes);
-    keys.forEach((k) => {
-      const aux = shapes.shapes[k];
-      aux.selected = false;
-      _shapes.push(aux);
-    });
-    dispatch(sendUpdateShapes(_shapes));
+    if (typeof shapes.shapes !== 'undefined') {
+      const keys = Object.keys(shapes.shapes);
+      keys.forEach((k) => {
+        const aux = shapes.shapes[k];
+        aux.selected = false;
+        _shapes.push(aux);
+      });
+      dispatch(sendUpdateShapes(_shapes));
+    }
   };
 }
 
@@ -455,7 +457,7 @@ export function sendStartClickCentring() {
           return response.json();
         })
         .then((json) => {
-          const {clicksLeft} = json;
+          const { clicksLeft } = json;
           dispatch(centringClicksLeft(clicksLeft));
 
           let msg = '3-Click Centring: <br />';
@@ -470,7 +472,7 @@ export function sendStartClickCentring() {
         });
     } else {
       dispatch(
-        showErrorPanel(true, 'There is no sample mounted, cannot center.')
+        showErrorPanel(true, 'There is no sample mounted, cannot center.'),
       );
     }
   };
@@ -478,7 +480,6 @@ export function sendStartClickCentring() {
 
 export function sendZoomPos(level) {
   return function (dispatch) {
-    dispatch(setMotorMoving('zoom', 4));
     fetch('/mxcube/api/v0.1/sampleview/zoom', {
       method: 'PUT',
       credentials: 'include',
@@ -546,7 +547,6 @@ export function sendStopMotor(motorName) {
 
 export function sendMotorPosition(motorName, value) {
   return function (dispatch) {
-    dispatch(setMotorMoving(motorName, 4));
     fetch(`/mxcube/api/v0.1/sampleview/${motorName}/${value}`, {
       method: 'PUT',
       credentials: 'include',
@@ -557,7 +557,6 @@ export function sendMotorPosition(motorName, value) {
     }).then((response) => {
       if (response.status === 406) {
         dispatch(showErrorPanel(true, response.headers.get('msg')));
-        dispatch(setMotorMoving(motorName, 2));
         throw new Error('Server refused to move motors: out of limits');
       }
       if (response.status >= 400) {
@@ -644,7 +643,7 @@ export function getSampleImageSize() {
       })
       .then((json) => {
         dispatch(
-          saveImageSize(json.imageWidth, json.imageHeight, json.pixelsPerMm[0])
+          saveImageSize(json.imageWidth, json.imageHeight, json.pixelsPerMm[0]),
         );
       });
   };

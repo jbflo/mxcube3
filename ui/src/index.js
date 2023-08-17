@@ -2,10 +2,10 @@ import 'bootstrap/dist/css/bootstrap.css';
 import './main.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 import App from './components/App';
-import { store, localStatePersistor } from './store';
+import { store } from './store';
+import DefaultErrorBoundary from './containers/DefaultErrorBoundary';
 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -27,11 +27,11 @@ if (module.hot) {
 function Root() {
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={localStatePersistor}>
-        <App/>
-      </PersistGate>
+      <DefaultErrorBoundary>
+        <App />
+      </DefaultErrorBoundary>
     </Provider>
   );
-};
+}
 
-ReactDOM.render(<Root/>, document.querySelector('#root'));
+ReactDOM.render(<Root />, document.querySelector('#root'));

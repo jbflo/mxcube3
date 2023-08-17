@@ -26,13 +26,12 @@ export function applicationFetched(data) {
   return { type: 'APPLICATION_FETCHED', data };
 }
 
-
 export function setLoading(
   loading,
   title = '',
   message = '',
   blocking = false,
-  abortFun = undefined
+  abortFun = undefined,
 ) {
   return {
     type: 'SET_LOADING',
@@ -72,7 +71,6 @@ function parse(response) {
 }
 
 function notify(error) {
-  // eslint-disable-next-line no-console
   console.error('REQUEST FAILED', error);
 }
 
@@ -161,7 +159,7 @@ export function getInitialState(userInControl) {
           Accept: 'application/json',
           'Content-type': 'application/json',
         },
-      }
+      },
     );
     const remoteAccess = fetch('mxcube/api/v0.1/ra/', {
       method: 'GET',
@@ -195,7 +193,7 @@ export function getInitialState(userInControl) {
         'Content-type': 'application/json',
       },
     });
-    const serverMode = fetch('mxcube/api/v0.1/mode', {
+    const serverMode = fetch('mxcube/api/v0.1/application_settings', {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -203,15 +201,6 @@ export function getInitialState(userInControl) {
         'Content-type': 'application/json',
       },
     });
-    const serverVersion = fetch('mxcube/api/v0.1/version', {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json',
-      },
-    });
-
 
     const pchains = [
       uiproperties
@@ -326,22 +315,14 @@ export function getInitialState(userInControl) {
           state.general = json;
         })
         .catch(notify),
-      serverVersion
-        .then(parse)
-        .then((json) => {
-          state.general = Object.assign(state.general, json);
-        })
-        .catch(notify)
     ];
 
-    let prom = Promise.all(pchains)
-      .then(() => {
-        dispatch(setInitialState(state));
-      });
+    let prom = Promise.all(pchains).then(() => {
+      dispatch(setInitialState(state));
+    });
 
     /* don't unselect shapes when in observer mode */
-    if (userInControl)
-    {
+    if (userInControl) {
       prom = prom.then(() => {
         dispatch(unselectShapes({ shapes: state.shapes }));
       });

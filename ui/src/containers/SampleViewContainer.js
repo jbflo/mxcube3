@@ -1,12 +1,20 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { Row, Col, Container } from 'react-bootstrap';
+import {
+  Row,
+  Col,
+  Container,
+  OverlayTrigger,
+  Popover,
+  Button,
+} from 'react-bootstrap';
 import SampleImage from '../components/SampleView/SampleImage';
 import MotorControl from '../components/SampleView/MotorControl';
 import PhaseInput from '../components/SampleView/PhaseInput';
 import ApertureInput from '../components/SampleView/ApertureInput';
 import SSXChipControl from '../components/SSXChip/SSXChipControl';
+import PlateManipulator from '../components/Equipment/PlateManipulator';
 import ContextMenu from '../components/SampleView/ContextMenu';
 import * as SampleViewActions from '../actions/sampleview';
 import * as GeneralActions from '../actions/general';
@@ -15,6 +23,16 @@ import { showTaskForm } from '../actions/taskForm';
 import BeamlineSetupContainer from './BeamlineSetupContainer';
 import SampleQueueContainer from './SampleQueueContainer';
 import { QUEUE_RUNNING } from '../constants';
+import DefaultErrorBoundary from './DefaultErrorBoundary';
+import { syncWithCrims } from '../actions/sampleGrid';
+import {
+  loadSample,
+  refresh,
+  selectWell,
+  setPlate,
+  selectDrop,
+  sendCommand,
+} from '../actions/sampleChanger';
 
 import {
   sendSetAttribute,
@@ -22,41 +40,8 @@ import {
   setBeamlineAttribute,
   sendDisplayImage,
   executeCommand,
+  sendLogFrontEndTraceBack,
 } from '../actions/beamline';
-
-class DefaultErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { error: null, errorInfo: null };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    // Catch errors in any components below and re-render with error message
-    this.setState({
-      error,
-      errorInfo
-    })
-    // You can also log error messages to an error reporting service here
-  }
-
-  render() {
-    if (this.state.errorInfo) {
-      // Error path
-      return (
-        <div>
-          <h2>Something went wrong.</h2>
-          <details style={{ whiteSpace: 'pre-wrap' }}>
-            {this.state.error && this.state.error.toString()}
-            <br />
-            {this.state.errorInfo.componentStack}
-          </details>
-        </div>
-      );
-    }
-    // Normally, just render children
-    return this.props.children;
-  }
-}
 
 class SampleViewContainer extends Component {
   render() {
@@ -72,36 +57,38 @@ class SampleViewContainer extends Component {
     const [points, lines, grids, twoDPoints] = [{}, {}, {}, {}];
     const selectedGrids = [];
 
-    Object.keys(this.props.shapes).forEach((key) => {
-      const shape = this.props.shapes[key];
-      switch (shape.t) {
-        case 'P': {
-          points[shape.id] = shape;
+    if (typeof this.props.shapes !== 'undefined') {
+      Object.keys(this.props.shapes).forEach((key) => {
+        const shape = this.props.shapes[key];
+        switch (shape.t) {
+          case 'P': {
+            points[shape.id] = shape;
 
-          break;
-        }
-        case '2DP': {
-          twoDPoints[shape.id] = shape;
-
-          break;
-        }
-        case 'L': {
-          lines[shape.id] = shape;
-
-          break;
-        }
-        case 'G': {
-          grids[shape.id] = shape;
-
-          if (shape.selected) {
-            selectedGrids.push(shape);
+            break;
           }
+          case '2DP': {
+            twoDPoints[shape.id] = shape;
 
-          break;
+            break;
+          }
+          case 'L': {
+            lines[shape.id] = shape;
+
+            break;
+          }
+          case 'G': {
+            grids[shape.id] = shape;
+
+            if (shape.selected) {
+              selectedGrids.push(shape);
+            }
+
+            break;
+          }
+          // No default
         }
-        // No default
-      }
-    });
+      });
+    }
     const diffractometerHo = this.props.hardwareObjects.diffractometer;
 
     const phaseControl = (
@@ -145,10 +132,12 @@ class SampleViewContainer extends Component {
         <Row className="gx-3 mt-2 pt-1">
           <Col sm={1}>
             <DefaultErrorBoundary>
-              {process.env.REACT_APP_PHASECONTROL==='true' ? phaseControl : null}
+              {process.env.REACT_APP_PHASECONTROL === 'true'
+                ? phaseControl
+                : null}
               {apertureControl}
-              {this.props.mode === 'SSX-CHIP' ?
-                (<SSXChipControl
+              {this.props.mode === 'SSX-CHIP' ? (
+                <SSXChipControl
                   showForm={this.props.showForm}
                   sampleID={sampleID}
                   sampleData={this.props.sampleList[sampleID]}
@@ -162,15 +151,92 @@ class SampleViewContainer extends Component {
                   sendSetAttribute={this.props.sendSetAttribute}
                   sendExecuteCommand={this.props.sendExecuteCommand}
                 />
-                ) : null
-              }
+              ) : null}
+              {this.props.sampleChangerContents.name === 'PlateManipulator' ? (
+                <div className="mb-4">
+                  <OverlayTrigger
+                    ref="plateOverlay"
+                    trigger="click"
+                    rootClose
+                    placement="auto-end"
+                    overlay={
+                      <Popover id="platePopover" style={{ maxWidth: '800px' }}>
+                        <Popover.Header>
+                          {this.props.global_state.plate_info.plate_label}
+                        </Popover.Header>
+                        <Popover.Body style={{ padding: '0px' }}>
+                          <PlateManipulator
+                            contents={this.props.sampleChangerContents}
+                            loadedSample={this.props.loadedSample}
+                            select={this.props.select}
+                            load={this.props.loadSample}
+                            send_command={this.props.send_command}
+                            refresh={this.props.refresh}
+                            plates={this.props.plateGrid}
+                            plateIndex={this.props.plateIndex}
+                            selectedRow={this.props.selectedRow}
+                            selectedCol={this.props.selectedCol}
+                            selectedDrop={this.props.selectedDrop}
+                            setPlate={this.props.setPlate}
+                            selectWell={this.props.selectWell}
+                            selectDrop={this.props.selectDrop}
+                            crystalList={this.props.crystalList}
+                            syncSamplesCrims={this.props.syncSamplesCrims}
+                            generalActions={this.props.generalActions}
+                            global_state={this.props.global_state}
+                            state={this.props.sampleChangerState}
+                            inPopover
+                          />
+                        </Popover.Body>
+                      </Popover>
+                    }
+                  >
+                    <Button
+                      variant="outline-secondary"
+                      style={{
+                        marginTop: '1em',
+                        minWidth: '155px',
+                        width: 'fit-conent',
+                        whiteSpace: 'nowrap',
+                      }}
+                      size="sm"
+                    >
+                      <i className="fa fa-th" /> Plate Navigation
+                      <i className="fa fa-caret-right" />
+                    </Button>
+                  </OverlayTrigger>
+                  <Button
+                    style={{
+                      marginTop: '1em',
+                      minWidth: '155px',
+                      width: 'fit-conent',
+                      whiteSpace: 'nowrap',
+                    }}
+                    variant="outline-secondary"
+                    size="sm"
+                    title={
+                      this.props.hasCrystal
+                        ? 'Move to Crystal position'
+                        : 'No Crystal Found / Crims not Sync'
+                    }
+                    onClick={() =>
+                      this.props.send_command('moveToCrystalPosition')
+                    }
+                    disabled={!this.props.hasCrystal}
+                  >
+                    <i className="fas fa-gem" /> Move to Crystal
+                  </Button>
+                </div>
+              ) : null}
               <MotorControl
                 save={this.props.sendSetAttribute}
                 saveStep={setStepSize}
                 uiproperties={uiproperties.sample_view}
                 hardwareObjects={this.props.hardwareObjects}
-                motorsDisabled={this.props.motorInputDisable
-                  || this.props.queueState === QUEUE_RUNNING}
+                motorsDisabled={
+                  this.props.motorInputDisable ||
+                  this.props.queueState === QUEUE_RUNNING
+                }
                 steps={motorSteps}
                 stop={this.props.sendAbortCurrentAction}
                 sampleViewActions={this.props.sampleViewActions}
@@ -235,7 +301,6 @@ class SampleViewContainer extends Component {
   }
 }
 
-
 function mapStateToProps(state) {
   return {
     sampleList: state.sampleGrid.sampleList,
@@ -256,7 +321,18 @@ function mapStateToProps(state) {
     remoteAccess: state.remoteAccess,
     uiproperties: state.uiproperties,
     taskForm: state.taskForm,
-    mode: state.general.mode
+    mode: state.general.mode,
+
+    sampleChangerContents: state.sampleChanger.contents,
+    sampleChangerState: state.sampleChanger.state,
+    global_state: state.sampleChangerMaintenance.global_state,
+    loadedSample: state.sampleChanger.loadedSample,
+    plateGrid: state.sampleChanger.plateGrid,
+    plateIndex: state.sampleChanger.currentPlateIndex,
+    selectedRow: state.sampleChanger.selectedRow,
+    selectedCol: state.sampleChanger.selectedCol,
+    selectedDrop: state.sampleChanger.selectedDrop,
+    crystalList: state.sampleGrid.crystalList,
   };
 }
 
@@ -267,14 +343,29 @@ function mapDispatchToProps(dispatch) {
     showForm: bindActionCreators(showTaskForm, dispatch),
     generalActions: bindActionCreators(GeneralActions, dispatch),
     sendSetAttribute: bindActionCreators(sendSetAttribute, dispatch),
-    sendAbortCurrentAction: bindActionCreators(sendAbortCurrentAction, dispatch),
+    sendAbortCurrentAction: bindActionCreators(
+      sendAbortCurrentAction,
+      dispatch,
+    ),
     setBeamlineAttribute: bindActionCreators(setBeamlineAttribute, dispatch),
     sendDisplayImage: bindActionCreators(sendDisplayImage, dispatch),
     sendExecuteCommand: bindActionCreators(executeCommand, dispatch),
+    sendLogFrontEndTraceBack: bindActionCreators(
+      sendLogFrontEndTraceBack,
+      dispatch,
+    ),
+
+    loadSample: (address) => dispatch(loadSample(address)),
+    refresh: () => dispatch(refresh()),
+    selectWell: (row, col) => dispatch(selectWell(row, col)),
+    setPlate: (address) => dispatch(setPlate(address)),
+    selectDrop: (address) => dispatch(selectDrop(address)),
+    syncSamplesCrims: () => dispatch(syncWithCrims()),
+    sendCommand: (cmd, args) => dispatch(sendCommand(cmd, args)),
   };
 }
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(SampleViewContainer);

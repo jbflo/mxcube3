@@ -233,7 +233,8 @@ class SampleChanger(ComponentBase):
 
                 # We remove the current sample from the queue, if we are moving
                 # from one sample to another and the current sample is in the queue
-                if sid and current_queue[sid]:
+
+                if sid and current_queue.get(sid, False):
                     node_id = current_queue[sid]["queueID"]
                     self.app.queue.set_enabled_entry(node_id, False)
                     signals.queue_toggle_sample(self.app.queue.get_entry(node_id)[1])
@@ -350,6 +351,34 @@ class SampleChanger(ComponentBase):
 
         return initial_state
 
+    def sync_with_crims(self):
+        """
+        To be use mostly when Diffractometer is in plate mode
+        This retun a List of crystal dict available in Crims that have been Harvested  
+        With this user can visualize easier where the crystal are in Plate GUI  
+        """
+        xtal_list = []
+        try:
+            processing_plan = HWR.beamline.sample_changer.sync_with_crims()
+            for x in processing_plan.plate.xtal_list:
+                response = {
+                    "crystal_uuid": x.crystal_uuid,
+                    "row": x.row,
+                    "column": x.column,
+                    "shelf": x.shelf,
+                    "offset_x": x.offset_x,
+                    "offset_y": x.offset_y,
+                    "image_url": x.image_url,
+                    "image_date": x.image_date,
+                    "sample": x.sample
+                }
+                xtal_list.append(response)
+            res = {"xtal_list": xtal_list}
+            return res
+        except Exception:
+            logging.getLogger("MX3.HWR").exception("Could not get crystal List")
+            return {"xtal_list": xtal_list}
+
 
 def queue_mount_sample(view, data_model, centring_done_cb, async_result):
     from mxcube3.routes import signals
@@ -372,14 +401,10 @@ def queue_mount_sample(view, data_model, centring_done_cb, async_result):
         "startTime": time.strftime("%Y-%m-%d %H:%M:%S"),
     }
 
-    # This is a possible solution how to deal with two devices that
-    # can move sample on beam (sample changer, plate holder, in future
-    # also harvester)
-    # TODO make sample_Changer_one, sample_changer_two
-    if HWR.beamline.diffractometer.in_plate_mode():
-        sample_mount_device = HWR.beamline.plate_manipulator
-    else:
-        sample_mount_device = HWR.beamline.sample_changer
+    # devices that can move sample on beam
+    # (sample changer, plate holder)
+    # PlateManipulator is being consider as Sample changer
+    sample_mount_device = HWR.beamline.sample_changer
 
     if (
         sample_mount_device.get_loaded_sample()
@@ -391,9 +416,6 @@ def queue_mount_sample(view, data_model, centring_done_cb, async_result):
         if sample_mount_device.__TYPE__ in ["Marvin", "CATS"]:
             element = "%d:%02d" % loc
             sample = {"location": element, "sampleID": element}
-            mxcube.sample_changer.mount_sample_clean_up(sample)
-        elif sample_mount_device.__TYPE__ == "PlateManipulator":
-            sample = {"location": data_model.loc_str, "sampleID": data_model.loc_str}
             mxcube.sample_changer.mount_sample_clean_up(sample)
         else:
             sample = {"location": data_model.loc_str, "sampleID": data_model.loc_str}

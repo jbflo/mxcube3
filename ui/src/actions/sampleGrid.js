@@ -27,17 +27,17 @@ export function addSamplesToList(samplesData) {
 
     let lastSampleID = Math.max(
       ...Object.values(sampleList).map((sampleData) =>
-        sampleData.location === 'Manual' ? sampleData.sampleID : 0
+        sampleData.location === 'Manual' ? sampleData.sampleID : 0,
       ),
-      0
+      0,
     );
 
     for (const sampleData of samplesData) {
       if (!sampleData.sampleID) {
         lastSampleID++;
         sampleData.sampleID = lastSampleID.toString();
-        sampleData.cell_no = 1
-        sampleData.puck_no = 1
+        sampleData.cell_no = 1;
+        sampleData.puck_no = 1;
       }
     }
 
@@ -96,8 +96,8 @@ export function sendGetSampleList() {
         true,
         'Please wait',
         'Retrieving sample changer contents',
-        true
-      )
+        true,
+      ),
     );
     return fetch('mxcube/api/v0.1/sample_changer/samples_list', {
       credentials: 'include',
@@ -115,7 +115,7 @@ export function sendGetSampleList() {
         () => {
           dispatch(setLoading(false));
           dispatch(showErrorPanel(true, 'Could not get samples list'));
-        }
+        },
       );
   };
 }
@@ -133,9 +133,9 @@ export function sendSyncSamples() {
             showErrorPanel(
               true,
               `Synchronization with ISPyB failed ${response.headers.get(
-                'message'
-              )}`
-            )
+                'message',
+              )}`,
+            ),
           );
         } else {
           result = response.json();
@@ -155,8 +155,41 @@ export function sendSyncSamples() {
         () => {
           dispatch(setLoading(false));
           dispatch(showErrorPanel(true, 'Synchronization with ISPyB failed'));
-        }
+        },
       );
+  };
+}
+
+// update list crystal from crims
+export function updateCrystalList(crystalList) {
+  return { type: 'UPDATE_CRYSTAL_LIST', crystalList };
+}
+
+export function syncWithCrims() {
+  return function (dispatch) {
+    fetch('mxcube/api/v0.1/sample_changer/sync_with_crims', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-type': 'application/json',
+      },
+      credentials: 'include',
+    }).then((response) => {
+      if (response.status >= 400) {
+        // throw new Error('Error while scanning sample changer');
+        dispatch(
+          showErrorPanel(
+            true,
+            `Synchronization with Crims failed ${response.headers.get(
+              'message',
+            )}`,
+          ),
+        );
+      }
+      response.json().then((crystalList) => {
+        dispatch(updateCrystalList(crystalList));
+      });
+    });
   };
 }
 
