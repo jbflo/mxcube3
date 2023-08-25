@@ -411,7 +411,6 @@ class Lims(ComponentBase):
 
         for sample_info in samples_info_list:
             sample_info["limsID"] = sample_info.pop("sampleId")
-            #sample_info["limsLink"] = HWR.beamline.lims.lims_rest.sample_link()
             sample_info["defaultPrefix"] = self.get_default_prefix(sample_info)
             sample_info["defaultSubDir"] = self.get_default_subdir(sample_info)
 
