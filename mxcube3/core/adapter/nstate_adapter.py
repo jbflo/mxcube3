@@ -25,14 +25,18 @@ class NStateAdapter(ActuatorAdapterBase):
         if isinstance(value, Enum):
             v = value.name
         else:
-            v = value
+            if isinstance(value, bool):
+                v = "OPEN" if value else "CLOSED"
+            elif isinstance(value, float):
+                v = "IN" if 1.0 else "OUT"
+            else:
+                v = value
 
         self.value_change(v)
 
     def _get_valid_states(self):
         state_names = [v.name for v in self._ho.VALUES]
         state_names.remove("UNKNOWN")
-
         return state_names
 
     def _get_available_states(self):
