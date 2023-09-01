@@ -364,7 +364,7 @@ export function sendDisplayImage(path, imgNum) {
       .then((response) => response.json())
       .then((data) => {
         window.open(
-          `https://braggy.mxcube3.esrf.fr/?file=${braggyPath}/image_${data.img_num}.h5.dataset`,
+          `https://braggy.mxcube3.esrf.fr/?file=${data.path}/image_${data.img_num}.h5.dataset`,
           'braggy',
         );
       });
