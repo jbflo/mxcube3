@@ -260,18 +260,18 @@ class AdapterBase:
             namespace="/hwr",
         )
 
-    def emit_ho_changed(self, state, **kwargs):
+    def emit_ho_changed(self, state=None, **kwargs):
         """
         Signal handler to be used for sending the entire object to the client via
         socketIO
         """
         data = self.dict()
 
-        if hasattr(state, "name"):
+        if state and hasattr(state, "name"):
             data["state"] = state.name
         else:
             logging.getLogger("MX3.HWR").info(
-                f"emit_ho_changed with {state} for {self._ho.name()}"
+                f"emit_ho_changed with {data['state']} for {self._ho.name()}"
             )
 
         self.app.server.emit("hardware_object_changed", data, namespace="/hwr")
@@ -281,7 +281,7 @@ class AdapterBase:
         Signal handler to be used for sending the state to the client via
         socketIO
         """
-        self.emit_ho_changed(state)
+        self.emit_ho_changed(state=state)
 
     def _dict_repr(self):
         """
@@ -421,7 +421,7 @@ class ActuatorAdapterBase(AdapterBase):
         try:
             data.update({"value": self.get_value(), "limits": self.limits()})
         except Exception as ex:
-            logging.getLogger("MX3.HWR").exception(
+            logging.getLogger("MX3.HWR").error(
                 f"Could not get dictionary representation of {self._ho.name()}"
             )
             logging.getLogger("MX3.HWR").error(

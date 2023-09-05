@@ -379,6 +379,7 @@ class ServerIO {
         data.operator.username === state.login.user.username &&
         !state.login.user.inControl
       ) {
+        this.dispatch(setLoading(false));
         this.dispatch(setLoading(true, 'You were given control', data.message));
       } else if (
         data.observers.length > 0 &&

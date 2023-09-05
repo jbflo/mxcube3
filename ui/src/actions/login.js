@@ -104,7 +104,7 @@ export function getLoginInfo() {
         },
         () => {
           dispatch(showErrorPanel(true));
-          dispatch(setLoading(false));
+          // dispatch(setLoading(false));
         },
       );
   };
