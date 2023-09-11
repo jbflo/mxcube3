@@ -103,7 +103,7 @@ class Harvester(ComponentBase):
         crystal_list = []
 
         try:
-            harvester_device = eHWR.beamline.harvester
+            harvester_device = HWR.beamline.harvester
             crystal_uuids = harvester_device.get_crystal_uuids()
             crystal_names = harvester_device.get_sample_names()
             crystal_acronymes = harvester_device.get_sample_acronyms()
