@@ -134,6 +134,7 @@ class Server:
         from mxcube3.routes.samplechanger import init_route as init_samplechanger_route
         from mxcube3.routes.workflow import init_route as init_workflow_route
         from mxcube3.routes.gphl_workflow import init_route as init_gphl_workflow_route
+        from mxcube3.routes.harvester import init_route as init_harvester_route
 
         url_root_prefix = "/mxcube/api/v0.1"
 
@@ -177,6 +178,10 @@ class Server:
 
         Server._register_route(
             init_gphl_workflow_route, mxcube, f"{url_root_prefix}/gphl_workflow"
+        )
+
+        Server._register_route(
+            init_harvester_route, mxcube, f"{url_root_prefix}/harvester"
         )
 
         Server.security = flask_security.Security(

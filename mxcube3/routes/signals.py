@@ -8,6 +8,8 @@ from flask import Response
 
 from mxcubecore.HardwareObjects.abstract.AbstractSampleChanger import SampleChangerState
 
+from mxcubecore.HardwareObjects.Harvester import HarvesterState
+
 from mxcube3.core.adapter.beamline_adapter import BeamlineAdapter
 from mxcube3.core.components.queue import READY, RUNNING, FAILED, COLLECTED, WARNING
 
@@ -92,6 +94,16 @@ def diffractometer_phase_changed(*args):
         "Diffractometer phase changed to %s" % args
     )
     server.emit("diff_phase_changed", data, namespace="/hwr")
+
+
+
+def harvester_state_changed(*args):
+    new_state = args[0]
+    state_str = HarvesterState.STATE_DESC.get(new_state, "Unknown").upper()
+    server.emit("harvester_state", state_str, namespace="/hwr")
+
+def harvester_contents_update():
+    server.emit("harvester_contents_update")
 
 
 def sc_state_changed(*args):

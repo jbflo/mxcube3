@@ -36,6 +36,10 @@ _objects:
     - safety_shutter: safety_shutter.xml
     - fast_shutter: fast_shutter.xml
     - hutch_interlock: hutchtrigger.xml
+
+    - harvester: harvester.xml
+    - harvester_maintenance: harvester_maintenance.xml
+
     - sample_changer: sc.xml
     - sample_changer_maintenance: sc_maint.xml
 

@@ -32,6 +32,7 @@ from mxcube3.core.components.sampleview import SampleView
 from mxcube3.core.components.queue import Queue
 from mxcube3.core.components.workflow import Workflow
 from mxcube3.core.components.gphl_workflow import GphlWorkflow
+from mxcube3.core.components.harvester import Harvester
 
 
 removeLoggingHandlers()
@@ -290,6 +291,7 @@ class MXCUBEApplication:
         MXCUBEApplication.sample_view = SampleView(MXCUBEApplication, {})
         MXCUBEApplication.workflow = Workflow(MXCUBEApplication, {})
         MXCUBEApplication.gphl_workflow = GphlWorkflow(MXCUBEApplication, {})
+        MXCUBEApplication.harvester = Harvester(MXCUBEApplication, {})
 
         MXCUBEApplication.init_signal_handlers()
         atexit.register(MXCUBEApplication.app_atexit)
@@ -338,6 +340,11 @@ class MXCUBEApplication:
         try:
             MXCUBEApplication.beamline.init_signals()
             MXCUBEApplication.beamline.diffractometer_init_signals()
+        except Exception:
+            sys.excepthook(*sys.exc_info())
+
+        try:
+            MXCUBEApplication.harvester.init_signals()
         except Exception:
             sys.excepthook(*sys.exc_info())
 
