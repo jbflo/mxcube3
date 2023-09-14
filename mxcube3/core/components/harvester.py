@@ -36,7 +36,7 @@ class Harvester(ComponentBase):
     
     def get_initial_state(self):
         if HWR.beamline.harvester_maintenance is not None:
-            global_state, cmdstate, msg = get_global_state()
+            global_state, cmdstate, msg = HWR.beamline.harvester_maintenance.get_global_state()
 
             cmds = HWR.beamline.harvester_maintenance.get_cmd_info()
         else:
