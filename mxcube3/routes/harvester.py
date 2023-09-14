@@ -27,7 +27,7 @@ def init_route(app, server, url_prefix):
     @bp.route("/contents", methods=["GET"])
     @server.restrict
     def get_harvester_contents_view():
-        return jsonify(app.get_harvester_contents())
+        return jsonify(app.harvester.get_harvester_contents())
 
     @bp.route("/harvest", methods=["POST"])
     @server.require_control
@@ -43,8 +43,9 @@ def init_route(app, server, url_prefix):
                 409,
                 {"Content-Type": "application/json", "message": str(ex)},
             )
+            return resp
 
-        return resp
+        return jsonify(app.harvester.get_harvester_contents())
 
     @bp.route("/harvest_and_mount", methods=["POST"])
     @server.require_control
@@ -60,8 +61,9 @@ def init_route(app, server, url_prefix):
                 409,
                 {"Content-Type": "application/json", "message": str(ex)},
             )
+            return resp
 
-        return resp
+        return jsonify(app.harvester.get_harvester_contents())
 
 
     @bp.route("/calibrate", methods=["GET"])
