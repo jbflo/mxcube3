@@ -96,8 +96,8 @@ def init_route(app, server, url_prefix):
             ret = HWR.beamline.harvester_maintenance.send_command(cmdparts, args)
             if cmdparts == 'setTemeratureMode':
                 value = True if args.lower() in ['true', 'True', '1'] else False
-                ret2 = HWR.beamline.sample_changer.set_room_temperature_mode(value)
-                ret3 = HWR.beamline.diffractometer.set_room_temperature_mode(value)
+                HWR.beamline.sample_changer.set_room_temperature_mode(value)
+                HWR.beamline.diffractometer.set_room_temperature_mode(value)
         except Exception as ex:
             msg = str(ex)
             msg = msg.replace("\n", " - ")

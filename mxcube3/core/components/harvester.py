@@ -28,10 +28,6 @@ class Harvester(ComponentBase):
             "contentsUpdated", signals.harvester_contents_update
         )
 
-        if HWR.beamline.harvester_maintenance is not None:
-            HWR.beamline.harvester_maintenance.connect(
-                "globalStateChanged", signals.sc_maintenance_update
-            )
 
     
     def get_initial_state(self):
@@ -233,59 +229,64 @@ class Harvester(ComponentBase):
                 md.save_current_motor_position()
                 harvester_device.set_calibrate_state(True)
 
-                print("Pin Calibration Step 1 Succeed")
+                logging.getLogger("user_level_log").info("Pin Calibration Step 1 Succeed")
                 return True
             except Exception:
-                print("Pin Calibration Failed")
+                logging.getLogger("user_level_log").exception("Pin Calibration Failed")
                 return False
         else:
-            print("Pin Calibration Failed")
-            print("Sample Changer could not mount Pin")
+            logging.getLogger("user_level_log").error("Pin Calibration Failed")
+            logging.getLogger("user_level_log").error("Sample Changer could not mount Pin")
             return False
 
     def cancel_calibration(self):
         harvester_device = HWR.beamline.harvester
         harvester_device.set_calibrate_state(False)
+        logging.getLogger("user_level_log").error("Pin Calibration Canceled")
 
     def validate_calibration(self):
         """
         finish Calibration Procedure 
         after user ran a 3 click centring
         """
-        harvester_device = HWR.beamline.harvester
-        md = HWR.beamline.diffractometer
-        
-        motor_pos_dict = {
-            "focus": md.focusMotor.get_value(),
-            "phiy": md.phiyMotor.get_value(),
-            "phiz": md.phizMotor.get_value(),
-            "centring_focus": md.centringFocus.get_value(),
-            "centring_vertical": md.centringVertical.get_value()
-        }
+        try:
+            harvester_device = HWR.beamline.harvester
+            md = HWR.beamline.diffractometer
+            
+            motor_pos_dict = {
+                "focus": md.focusMotor.get_value(),
+                "phiy": md.phiyMotor.get_value(),
+                "phiz": md.phizMotor.get_value(),
+                "centring_focus": md.centringFocus.get_value(),
+                "centring_vertical": md.centringVertical.get_value()
+            }
 
-        saved_position = md.saved_motor_position
+            saved_position = md.saved_motor_position
 
-        new_motor_offset= {
-            "focus":motor_pos_dict["focus"] - saved_position["focus"],
-            "phiy": motor_pos_dict["phiy"] - saved_position["phiy"],
-            "phiz": motor_pos_dict["phiz"] - saved_position["phiz"],
-            "centring_focus":motor_pos_dict["centring_focus"] - saved_position["centring_focus"],
-            "centring_vertical":motor_pos_dict["centring_vertical"] - saved_position["centring_vertical"],
-        }
+            new_motor_offset= {
+                "focus":motor_pos_dict["focus"] - saved_position["focus"],
+                "phiy": motor_pos_dict["phiy"] - saved_position["phiy"],
+                "phiz": motor_pos_dict["phiz"] - saved_position["phiz"],
+                "centring_focus":motor_pos_dict["centring_focus"] - saved_position["centring_focus"],
+                "centring_vertical":motor_pos_dict["centring_vertical"] - saved_position["centring_vertical"],
+            }
 
-        calibrated_motor_offset= {
-            "focus": new_motor_offset["focus"] + new_motor_offset["centring_focus"],
-            "phiy": new_motor_offset["phiy"],
-            "phiz": new_motor_offset["phiz"] + new_motor_offset["centring_vertical"],
-        }
+            calibrated_motor_offset= {
+                "focus": new_motor_offset["focus"] + new_motor_offset["centring_focus"],
+                "phiy": new_motor_offset["phiy"],
+                "phiz": new_motor_offset["phiz"] + new_motor_offset["centring_vertical"],
+            }
 
-        # temp solution save them to memory
-        print(calibrated_motor_offset)
-        harvester_device.store_calibrated_pin(
-            calibrated_motor_offset["focus"], calibrated_motor_offset["phiy"], calibrated_motor_offset["phiz"])
+            # temp solution save them to memory
+            print(calibrated_motor_offset)
+            harvester_device.store_calibrated_pin(
+                calibrated_motor_offset["focus"], calibrated_motor_offset["phiy"], calibrated_motor_offset["phiz"])
 
-        harvester_device.set_calibrate_state(False)
-        return
+            harvester_device.set_calibrate_state(False)
+        except Exception as ex:
+            logging.getLogger("user_level_log").exception(f"Pin Calibration validtion Failed {str(ex)}")
+
+        return True
 
     def get_sample_info(self, location):
         samples_list = HWR.beamline.sample_changer.get_sample_list()
@@ -481,16 +482,5 @@ class Harvester(ComponentBase):
     def harvest_crystal(self, xtal_uuid):
         try:
             return HWR.beamline.harvester.harvest_crystal(xtal_uuid)
-        except:
-            return "Coul not Harvest Crystal"
-
-    def get_sample_drift_centring(self):
-        try:
-            HWR.beamline.harvester.harvest_crystal(xtal_uuid)
-            sample_drift_x = float(HWR.beamline.harvester.get_last_sample_drift_offset_x())
-            sample_drift_y = float(-HWR.beamline.harvester.get_last_sample_drift_offset_y())
-            sample_drift_z = float(HWR.beamline.harvester.get_last_sample_drift_offset_z())
-
-            sample_drift = (sample_drift_x, sample_drift_y, sample_drift_z)
         except:
             return "Coul not Harvest Crystal"
