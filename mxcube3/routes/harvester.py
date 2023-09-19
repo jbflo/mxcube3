@@ -71,7 +71,6 @@ def init_route(app, server, url_prefix):
     @server.restrict
     def calibrate():
         ret = app.harvester.calibrate_pin()
-        # ret = harvester.send_data_collection_info_to_crims()
         if ret:
             return jsonify(app.harvester.get_harvester_contents())
 

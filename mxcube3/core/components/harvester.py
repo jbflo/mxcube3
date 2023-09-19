@@ -62,11 +62,10 @@ class Harvester(ComponentBase):
 
 
     def get_harvester_contents(self):
-        # import pdb; pdb.set_trace()
         if HWR.beamline.harvester:
             root_name = HWR.beamline.harvester.__TYPE__
             crystal_list = self.get_crystal_list()
-            room_temperature = HWR.beamline.harvester.get_room_temperature()
+            room_temperature = HWR.beamline.harvester.get_room_temperature_mode()
             number_of_pins = HWR.beamline.harvester.get_number_of_available_pin()
             contents = {
                 "name": root_name,
@@ -131,19 +130,19 @@ class Harvester(ComponentBase):
                     "crystal_uuid": "94730c39-bf66-416f-ab97-f755e45f6a3b",
                     "name": "TEST1",
                     "acronym": "cryoprotectant",
-                    "img_url": "https://htxlab.embl.fr/agility/plates/CD032401/inspections/6/images/B5-1/types/webimages"
+                    "img_url": "https://htxlab.embl.fr//rawimages/2023//CD037770/6/FORMULATRIX_CD037770_6_04-05-2023_12_01_03_00_99_Vis.jpg"
                 },
                 {
                     "crystal_uuid": "94730c39-bf66-416f-ab97-f755e45f6a3a",
                     "name": "TEST12",
                     "acronym": "cryoprotectant",
-                    "img_url": "https://htxlab.embl.fr/agility/plates/CD032401/inspections/6/images/B5-1/types/webimages"
+                    "img_url": "https://htxlab.embl.fr//rawimages/2023//CD037770/6/FORMULATRIX_CD037770_6_04-05-2023_03_01_01_00_99_Vis.jpg"
                 },
                 {
                     "crystal_uuid": "94730c39-bf66-416f-ab97-f755e45f6a3m",
                     "name": "TEST13",
                     "acronym": "cryoprotectant",
-                    "img_url": "https://htxlab.embl.fr/agility/plates/CD032401/inspections/6/images/B5-1/types/webimages"
+                    "img_url": "https://htxlab.embl.fr//rawimages/2023//CD037770/6/FORMULATRIX_CD037770_6_04-05-2023_06_01_03_00_99_Vis.jpg"
                 },
             ]
         
@@ -158,29 +157,30 @@ class Harvester(ComponentBase):
 
 
     def send_data_collection_info_to_crims(self):
-        # import pdb; pdb.set_trace()
 
         datacollectionGroupId = ''
         crystal_uuid =  ''
+        harvester_device = HWR.beamline.harvester
 
         try:
             rest_token = HWR.beamline.lims.lims_rest.get_rest_token()
             proposal = HWR.beamline.session.get_proposal()
 
-            crims_url = "https://htxlab.embl.fr/ispyb_checker/api/v2/crystal/"
+            crims_url = harvester_device.crims_upload_url
 
             queue_entries = HWR.beamline.queue_model.get_all_dc_queue_entries()
-            di_id = []
+            dc_id = ''
             for qe in queue_entries:
                 datacollectionGroupId = qe.get_data_model().lims_group_id
                 crystal_uuid =  qe.get_data_model().get_sample_node().crystals[0].crystal_uuid
-                di_id= qe.get_data_model().id
+                dc_id = qe.get_data_model().id
 
-                Crims.send_data_collection_info_to_crims(crims_url, crystal_uuid, datacollectionGroupId, di_id, proposal, rest_token)
+                Crims.send_data_collection_info_to_crims(crims_url, crystal_uuid, datacollectionGroupId, dc_id, proposal, rest_token)
             return True  
         except Exception as ex:
             msg = "get all queue entries failed, reason:  %s" % str(ex)
-            return msg   
+            logging.getLogger("user_level_log").exception(msg)
+            return False   
 
 
 
@@ -192,8 +192,6 @@ class Harvester(ComponentBase):
         """
         Pin Calibration Procedure here
         """
-        # send_data_collection_info_to_crims() # to be remove later
-        # import pdb; pdb.set_trace()
         harvester_device = HWR.beamline.harvester
 
         harvester_device.load_calibrated_pin()
@@ -431,7 +429,7 @@ class Harvester(ComponentBase):
     def queue_harvest_sample(self, data_model, sample):
         current_queue = self.app.queue.queue_to_dict()
         harvester_device = HWR.beamline.harvester
-        wait_before_load  =  True if harvester_device.get_room_temperature() == False else False
+        wait_before_load  =  True if harvester_device.get_room_temperature_mode() == False else False
         if harvester_device.get_number_of_available_pin() > 0 :
             gevent.sleep(2)
             sample_UUID = current_queue[sample["sampleID"]]["code"]

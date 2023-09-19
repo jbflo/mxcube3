@@ -433,7 +433,6 @@ def queue_mount_sample(view, data_model, centring_done_cb, async_result):
             if sample_mount_device.mount_from_harvester():
                 mxcube.harvester.queue_harvest_sample(data_model, sample)
 
-
             try:
                 res = mxcube.sample_changer.mount_sample_clean_up(sample)
             except RuntimeError:
@@ -453,7 +452,7 @@ def queue_mount_sample(view, data_model, centring_done_cb, async_result):
                 )
     
     # Harvesting Next sample after loadding
-    if sample_mount_device.mount_from_harvester() and blcontrol.beamline.harvester.get_room_temperature() == False:
+    if sample_mount_device.mount_from_harvester() and HWR.beamline.harvester.get_room_temperature_mode() == False:
         mxcube.harvester.queue_harvest_sample(data_model, sample)
     
     robot_action_dict["endTime"] = time.strftime("%Y-%m-%d %H:%M:%S")
