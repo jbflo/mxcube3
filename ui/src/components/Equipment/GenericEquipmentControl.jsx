@@ -2,9 +2,7 @@ import React from 'react';
 import {
   Row,
   Col,
-  Accordion,
   Button,
-  Card,
   OverlayTrigger,
   Popover,
 } from 'react-bootstrap';

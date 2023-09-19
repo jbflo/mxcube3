@@ -1,5 +1,5 @@
 import React from 'react';
-import { Accordion, Card, Button, Badge } from 'react-bootstrap';
+import { Card, Button, Badge } from 'react-bootstrap';
 import { contextMenu, Menu, Item, Separator } from 'react-contexify';
 
 import {CopyToClipboard} from 'react-copy-to-clipboard';
@@ -7,23 +7,6 @@ import { MdContentCopy } from 'react-icons/md';
 import { FcCancel, FcRefresh, FcUpload, FcCollect } from 'react-icons/fc';
 
 import ImageViewer from '../ImageViewer/ImageViewer.jsx';
-// import '../SampleGrid/SampleGrid.css';
-// import '../context-menu-style.css';
-
-const getItems = (count) =>
-  Array.from({ length: count }, (v, k) => k).map((k) => ({
-    id: `item-${k}`,
-    content: `item ${k}`,
-  }));
-
-// a little function to help us with reordering the result
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-
-  return result;
-};
 
 export default class Harvester extends React.Component {
   constructor(props) {
@@ -33,8 +16,6 @@ export default class Harvester extends React.Component {
     this.unload = this.unload.bind(this);
     this.onCopy = this.onCopy.bind(this);
     this.state = {
-      items: getItems(160),
-      value: '',
       copied: false,
     };
 
@@ -88,7 +69,9 @@ export default class Harvester extends React.Component {
     let sampleStateBackground = (key) => {
       if (key === 'ready_to_execute') {
         return 'success';
-      } else if (key === 'harvested' || key === 'needs_repositionning') {
+      } else if (key === 'harvested') {
+        return 'info';
+      } else if (key === 'needs_repositionning') {
         return 'warning';
       } else if (key === 'failed') {
         return 'danger';
@@ -113,14 +96,13 @@ export default class Harvester extends React.Component {
     );
 
     return (
-      <Accordion header="Contents" defaultActiveKey="0">
-        <Accordion.Item eventKey="0">
-          <Accordion.Header>
+        <Card>
+          <Card.Header>
             <span style={{ marginLeft: '10px' }}>
               Number Of Available Pins : {this.props.contents.number_of_pins}
             </span>
-          </Accordion.Header>
-          <Accordion.Body>
+          </Card.Header>
+          <Card.Body>
             <div style={{ padding: '1em' }}>
               <Button variant="outline-secondary mb-2" onClick={this.props.refresh}>
                 <FcRefresh /> Refresh
@@ -129,18 +111,18 @@ export default class Harvester extends React.Component {
                 className="ha-grid-container"
               >
                 {crystalUUID
-                  ? crystalUUID.map((item, index) => [
+                  ? crystalUUID.map( item =>
+                    <>
                       <div
                         key={item.crystal_uuid}
                         className="ha-grid-item"
-                        // tabIndex={0}
                         role="button"
                         onContextMenu={(e) =>
                           this.showContextMenu(e, item.crystal_uuid)
                         }
                       >
                         <h6 className="text-center mt-1">
-                          <Badge bg="primary" className="text-center">
+                          <Badge pill bg="light" style={{ color: 'brown'}}>
                             {item.name}
                           </Badge>
                         </h6>
@@ -182,9 +164,10 @@ export default class Harvester extends React.Component {
                             </CopyToClipboard>
                           </div>
                         </div>
-                      </div>,
-                      crystalMenu(item.crystal_uuid),
-                    ])
+                      </div>
+                      {crystalMenu(item.crystal_uuid)}
+                      </>
+                  )
                   : null}
               </div>
 
@@ -194,9 +177,8 @@ export default class Harvester extends React.Component {
                 <circle cx="50" cy="50" r="5"/>
               </svg> */}
             </div>
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
+          </Card.Body>
+      </Card>
     );
   }
 }
