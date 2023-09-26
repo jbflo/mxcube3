@@ -192,8 +192,8 @@ export default class SampleImage extends React.Component {
       this.canvas.add(this.centringVerticalLine);
       this.canvas.add(this.centringHorizontalLine);
     }
-    
-    if (options.e.buttons > 0 && this.drawGridPlugin.drawing) {    
+
+    if (options.e.buttons > 0 && this.drawGridPlugin.drawing) {
       this.drawGridPlugin.update(
         this.canvas,
         options.e.layerX,
@@ -567,7 +567,7 @@ export default class SampleImage extends React.Component {
       );
     } else if (this.props.drawGrid) {
       this.drawGridPlugin.startDrawing(option, this.canvas, imageRatio);
-    } else if (this._keyPressed == "s" || this._keyPressed == "d") {
+    } else if (this._keyPressed == 's' || this._keyPressed == 'd') {
       debugger;
       console.log(this._keyPressed);
       const cellSizeX = beamSize.x * pixelsPerMm[0] * imageRatio;

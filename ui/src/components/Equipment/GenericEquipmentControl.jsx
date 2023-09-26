@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Row,
-  Col,
-  Button,
-  OverlayTrigger,
-  Popover,
-} from 'react-bootstrap';
+import { Row, Col, Button, OverlayTrigger, Popover } from 'react-bootstrap';
 
 import Collapsible from 'react-collapsible';
 import { BsChevronUp, BsChevronDown } from 'react-icons/bs';

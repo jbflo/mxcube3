@@ -22,11 +22,12 @@ class Harvester(ComponentBase):
         from mxcube3.routes import signals
 
         """Initialize hwobj signals."""
-        HWR.beamline.harvester.connect("stateChanged", signals.harvester_state_changed)
+        if  HWR.beamline.harvester:
+            HWR.beamline.harvester.connect("stateChanged", signals.harvester_state_changed)
 
-        HWR.beamline.harvester.connect(
+            HWR.beamline.harvester.connect(
             "contentsUpdated", signals.harvester_contents_update
-        )
+            )
 
 
     
@@ -65,14 +66,14 @@ class Harvester(ComponentBase):
         if HWR.beamline.harvester:
             root_name = HWR.beamline.harvester.__TYPE__
             crystal_list = self.get_crystal_list()
-            room_temperature = HWR.beamline.harvester.get_room_temperature_mode()
+            room_temperature_mode = HWR.beamline.harvester.get_room_temperature_mode()
             number_of_pins = HWR.beamline.harvester.get_number_of_available_pin()
             contents = {
                 "name": root_name,
                 "harverster_crystal_list": crystal_list,
                 "number_of_pins": number_of_pins,
                 "calibration_state": self.get_calibrate_state(),
-                "room_temperature": room_temperature
+                "room_temperature_mode": room_temperature_mode
             }
         else:
             contents = {"name": "OFFLINE"}
