@@ -58,7 +58,7 @@ class SampleChanger(ComponentBase):
             sample_data = {
                 "sampleID": s.get_address(),
                 "location": s.get_address(),
-                "sampleName": "Sample-%s" % s.get_address(),
+                "sampleName": s.get_name() or "Sample-%s" % s.get_address(),
                 "crystalUUID": s.get_id() or s.get_address(),
                 "proteinAcronym": s.proteinAcronym if hasattr(s, 'proteinAcronym') else '',
                 "code": sample_dm,
@@ -217,6 +217,7 @@ class SampleChanger(ComponentBase):
                     res
                     and self.app.CENTRING_METHOD == queue_entry.CENTRING_METHOD.LOOP
                     and not HWR.beamline.diffractometer.in_plate_mode()
+                    and not sc.mount_from_harvester()
                 ):
                     HWR.beamline.diffractometer.reject_centring()
                     msg = "Starting autoloop centring ..."

@@ -10,7 +10,7 @@ def init_route(app, server, url_prefix):
     @server.restrict
     def get_crystal_list():
         app.harvester.get_crystal_list()
-        return jsonify(app.lims.sample_list_get())
+        return jsonify(app.harvester.get_harvester_contents())
 
 
     @bp.route("/harvester_state", methods=["GET"])

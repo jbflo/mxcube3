@@ -199,7 +199,7 @@ class Harvester(ComponentBase):
         print("waiting 40 seconds before mount")
         # For some reason the Harvester return READY too soon
         # approximately 40 SEcond sooner
-        sleep(40)
+        gevent.sleep(40)
         sample_mount_device = HWR.beamline.sample_changer
         mount_current_sample = sample_mount_device.single_load()
 
@@ -213,9 +213,9 @@ class Harvester(ComponentBase):
                 sample_drift_z = float(-harvester_device.get_last_sample_drift_offset_z())
                 
                 motor_pos_dict = {
-                    "kappa": float(harvester_device.centring_calibration_hobj.kappa_ref_value), # 95.35,
-                    "kappa_phi": float(harvester_device.centring_calibration_hobj.phi_ref_value), #351,
-                    "phi": float(harvester_device.centring_calibration_hobj.omega_ref_value),  #315,
+                    "kappa": float(md["HacentringReferencePosition"].get_property("kappa_ref")),
+                    "kappa_phi": float(md["HacentringReferencePosition"].get_property("phi_ref")),
+                    "phi": float(md["HacentringReferencePosition"].get_property("omega_ref")),
                     "phiy": md.phiyMotor.get_value() +   sample_drift_x,
                 }
 
