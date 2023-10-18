@@ -133,6 +133,9 @@ class SampleChanger(ComponentBase):
 
             contents = {"name": root_name}
 
+            if hasattr(HWR.beamline.sample_changer, "get_room_temperature_mode"):
+                contents["room_temperature_mode"] = HWR.beamline.sample_changer.get_room_temperature_mode()
+
             try:
                 has_harvester =  HWR.beamline.sample_changer.mount_from_harvester()
             except Exception:
@@ -224,6 +227,12 @@ class SampleChanger(ComponentBase):
                     logging.getLogger("MX3.HWR").info(msg)
                     C3D_MODE = HWR.beamline.diffractometer.C3D_MODE
                     HWR.beamline.diffractometer.start_centring_method(C3D_MODE)
+                elif HWR.beamline.diffractometer.in_plate_mode():
+                    msg = "Starting autoloop Focusin ..."
+                    logging.getLogger("MX3.HWR").info(msg)
+                    sc.move_to_crystal_position(None)
+
+
 
             else:
                 msg = "Mounting sample: %s" % sample["sampleName"]
@@ -454,7 +463,7 @@ def queue_mount_sample(view, data_model, centring_done_cb, async_result):
     
     # Harvesting Next sample after loadding
     if sample_mount_device.mount_from_harvester() and HWR.beamline.harvester.get_room_temperature_mode() == False:
-        mxcube.harvester.queue_harvest_sample(data_model, sample)
+        mxcube.harvester.queue_harvest_sample_next(data_model, sample)
     
     robot_action_dict["endTime"] = time.strftime("%Y-%m-%d %H:%M:%S")
     if sample_mount_device.has_loaded_sample():
